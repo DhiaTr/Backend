@@ -54,8 +54,8 @@ const schema = mongoose.Schema({
 
 const ContactInFo = mongoose.model('ContactInfo', schema);
 
-function validateContactInfo(ContactInfo) {
-    const schema = {
+function validateContactInfo() {
+    return Joi.object({
         phone1: Joi.string().min(8).max(20).required(),
         phone2: Joi.string().min(8).max(20).required(),
         address: Joi.string().min(30).max(255).required(),
@@ -64,8 +64,7 @@ function validateContactInfo(ContactInfo) {
         TwitterURL: Joi.string().min(20).max(1024).required(),
         InstagramURL: Joi.string().min(20).max(1024).required(),
         LinkedinURL: Joi.string().min(20).max(1024).required()
-    }
-    return Joi.validate(ContactInFo, schema);
+    });
 }
 
 module.exports.ContactInFo = ContactInFo;

@@ -17,7 +17,7 @@ const schema = mongoose.Schema({
     },
     tags: {
         type: String,
-        minlength: 20,
+        minlength: 10,
         maxlength: 100,
         required: true
     },
@@ -27,6 +27,26 @@ const schema = mongoose.Schema({
                 type: String,
                 minlength: 10,
                 maxlength: 1024,
+                required: true
+            }
+        })
+    },
+    thumbnailPath: {
+        type: new mongoose.Schema({
+            path: {
+                type: String,
+                minlength: 10,
+                maxlength: 1024,
+                required: true
+            }
+        })
+    },
+    Menu: {
+        type: new mongoose.Schema({
+            Name: {
+                type: String,
+                minlength: 5,
+                maxlength: 100,
                 required: true
             }
         })
