@@ -21,7 +21,7 @@ const schema = mongoose.Schema({
         maxlength: 100,
         required: true
     },
-    imagePath: {
+    image: {
         type: new mongoose.Schema({
             path: {
                 type: String,
@@ -31,22 +31,12 @@ const schema = mongoose.Schema({
             }
         })
     },
-    thumbnailPath: {
+    thumbnail: {
         type: new mongoose.Schema({
             path: {
                 type: String,
                 minlength: 10,
                 maxlength: 1024,
-                required: true
-            }
-        })
-    },
-    Menu: {
-        type: new mongoose.Schema({
-            Name: {
-                type: String,
-                minlength: 5,
-                maxlength: 100,
                 required: true
             }
         })
@@ -60,7 +50,8 @@ function validateFormation(Formation) {
         Name: Joi.string().min(5).max(100).required(),
         Description: Joi.string().min(10).max(150).required(),
         tags: Joi.string().min(20).max(100).required(),
-        imagePath: Joi.objectId()
+        image: Joi.objectId(),
+        thumbnail: Joi.objectId()
     }
     return Joi.validate(Formation, schema);
 }

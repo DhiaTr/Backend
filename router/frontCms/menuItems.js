@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mognoose = require('mongoose');
 
 const { Formation } = require('../../models/formation');
 const { Menu } = require('../../models/frontCms/menu');
@@ -10,9 +11,16 @@ router.get('/:menuId', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
+    
+    const PageIdStatus = mognoose.Types.ObjectId.isValid(req.body.page);
+    if (!PageIdStatus) return res.status(400).send('Invalid Page id');
+    const MenuIdStatus = mognoose.Types.ObjectId.isValid(req.body.menu);
+    if (!MenuIdStatus) return res.status(400).send('Invalid Menu id');
 
     const page = await Formation.findById(req.body.page);
+    if (!page) return res.status(400).send('Page not Found.');
     const menu = await Menu.findById(req.body.menu);
+    if (!menu) return res.status(400).send('Menu not Found.');
 
     const menuItem = new MenuItem({
         menu: { _id: menu._id, Name: menu.Name },
