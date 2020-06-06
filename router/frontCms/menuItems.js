@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const { Formation } = require('../models/formation');
-const { Menu } = require('../models/menu');
-const { MenuItem } = require('../models/menuItem');
+const { Formation } = require('../../models/formation');
+const { Menu } = require('../../models/frontCms/menu');
+const { MenuItem } = require('../../models/frontCms/menuItem');
 
 router.get('/:menuId', async (req, res) => {
     res.send(await MenuItem.find({ 'menu._id': req.params.menuId }));

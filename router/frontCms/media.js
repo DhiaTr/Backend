@@ -5,10 +5,10 @@ const multer = require('multer');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'upload/');
+        cb(null, 'uploads/');
     },
     filename: function (req, file, cb) {
-        cb(null, new Date().toISOString().replace(/:/g, '-') + file.originalname);
+        cb(null, new Date().toISOString().replace(/:/g, '') + file.originalname);
     }
 });
 
@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
-const { Media } = require('../models/media');
+const { Media } = require('../../models/frontCms/media');
 
 
 router.get('/', async (req, res) => {
@@ -28,9 +28,13 @@ router.get('/id', async (req, res) => {
 });
 
 router.post('/', upload.single('image'), async (req, res) => {
-    // const media = new Media({ path: req.file.path });
-    // res.send(await media.save());
-    res.send('1');
+    const media = new Media({ path: req.file.path });
+    res.send(await media.save());
+});
+
+router.delete('/id', async (req, res) => {
+    const media = await Media.findByIdAndDelete(req.params.id);
+    res.send(media);
 });
 
 

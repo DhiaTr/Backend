@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { ContactInFo, validateContactInfo } = require('../models/contactInfo');
+const { ContactInFo, validateContactInfo } = require('../../models/frontCms/contactInfo');
 
 router.get('/', async (req, res) => {
     res.send(await ContactInFo.findOne());

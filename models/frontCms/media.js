@@ -12,11 +12,10 @@ const schema = mongoose.Schema({
 
 const Media = mongoose.model('Media', schema);
 
-function validateMedia(Media) {
-    const schema = {
-        path: Joi.string().min(5).max(1024).required()
-    }
-    return Joi.validate(Media, schema);
+function validateMedia() {
+    return Joi.object({
+        path: Joi.string().min(10).max(1024).required()
+    })
 }
 
 module.exports.Media = Media;
