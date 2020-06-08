@@ -12,10 +12,10 @@ const schema = mongoose.Schema({
     Description: {
         type: String,
         minlength: 10,
-        maxlength: 150,
+        maxlength: 1024,
         required: true
     },
-    tags: {
+    Teacher: {
         type: String,
         minlength: 10,
         maxlength: 100,
@@ -31,30 +31,36 @@ const schema = mongoose.Schema({
             }
         })
     },
-    thumbnail: {
-        type: new mongoose.Schema({
-            path: {
-                type: String,
-                minlength: 10,
-                maxlength: 1024,
-                required: true
-            }
-        })
+    durationInMonths: {
+        type: Number,
+        min: 1,
+        max: 20,
+        required: true
+    },
+    Price: {
+        type: Number,
+        min: 0,
+        max: 100000,
+        required: true
+    },
+    nOfLectures: {
+        type: Number,
+        min: 1,
+        max: 1000,
+        required: true
     }
 });
 
 const Formation = mongoose.model('Formation', schema);
 
-function validateFormation(Formation) {
-    const schema = {
-        Name: Joi.string().min(5).max(100).required(),
-        Description: Joi.string().min(10).max(150).required(),
-        tags: Joi.string().min(20).max(100).required(),
-        image: Joi.objectId(),
-        thumbnail: Joi.objectId()
-    }
-    return Joi.validate(Formation, schema);
-}
 
 module.exports.Formation = Formation;
-module.exports.validateFormation = validateFormation;
+module.exports.validateFormation = Joi.object({
+    Name: Joi.string().min(5).max(100).required(),
+    Description: Joi.string().min(10).max(1024).required(),
+    Teacher: Joi.string().min(10).max(100).required(),
+    image: Joi.objectId(),
+    durationInMonths: Joi.number().min(1).max(20).required(),
+    Price: Joi.number().min(0).max(100000).required(),
+    nOfLectures: Joi.number().min(1).max(1000).required(),
+});

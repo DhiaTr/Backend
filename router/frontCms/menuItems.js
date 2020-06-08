@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mognoose = require('mongoose');
 
-const { Formation } = require('../../models/formation');
+const { Formation } = require('../../models/formations/formation');
 const { Menu } = require('../../models/frontCms/menu');
 const { MenuItem } = require('../../models/frontCms/menuItem');
 
@@ -11,7 +11,7 @@ router.get('/:menuId', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-    
+
     const PageIdStatus = mognoose.Types.ObjectId.isValid(req.body.page);
     if (!PageIdStatus) return res.status(400).send('Invalid Page id');
     const MenuIdStatus = mognoose.Types.ObjectId.isValid(req.body.menu);
