@@ -29,7 +29,7 @@ const schema = mongoose.Schema({
   Address: {
     type: String,
     minlength: 10,
-    maxlength: 100,
+    maxlength: 255,
     required: true,
   },
   GuardianRelation: {
@@ -48,6 +48,6 @@ module.exports.validateGuardian = Joi.object({
   phone: Joi.string().min(8).max(20).required(),
   Occupation: Joi.string().min(10).max(100).required(),
   Email: Joi.string().min(10).max(100).required(),
-  Address: Joi.string().min(10).max(100).required(),
+  Address: Joi.string().min(10).max(255).required(),
   GuardianRelation: Joi.string().min(5).max(100).required(),
 });

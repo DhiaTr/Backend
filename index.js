@@ -16,6 +16,7 @@ const pages = require("./router/frontCms/pages");
 const formations = require("./router/formations/formations");
 
 const guardians = require("./router/academics/guardians");
+const students = require("./router/academics/students");
 
 app.use("/api/contactInfo", contactInfo);
 app.use("/api/menuItems", menuItems);
@@ -27,6 +28,7 @@ app.use("/api/pages", pages);
 app.use("/api/formations", formations);
 
 app.use("/api/guardians", guardians);
+app.use("/api/students", students);
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () =>
