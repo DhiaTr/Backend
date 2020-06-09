@@ -18,7 +18,9 @@ const formations = require("./router/formations/formations");
 const guardians = require("./router/academics/guardians");
 const entreprises = require("./router/academics/Entreprises");
 const students = require("./router/academics/students");
+const Employees = require("./router/academics/Employees");
 const Auth = require("./router/academics/login");
+
 
 app.use("/api/contactInfo", contactInfo);
 app.use("/api/menuItems", menuItems);
@@ -32,6 +34,8 @@ app.use("/api/formations", formations);
 app.use("/api/guardians", guardians);
 app.use("/api/students", students);
 app.use("/api/entreprises", entreprises);
+app.use("/api/employees", Employees);
+
 
 app.use("/api/auth", Auth);
 

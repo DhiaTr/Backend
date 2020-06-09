@@ -29,10 +29,10 @@ const schema = mongoose.Schema({
         maxlength: 255,
         required: true,
     },
-    employees: [{
+    Entreprise: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Employee",
-    }],
+        ref: "Entreprise",
+    },
     password: {
         type: String,
         minlength: 5,
@@ -43,17 +43,17 @@ const schema = mongoose.Schema({
 });
 
 schema.methods.generateAuthToken = function () {
-    return jwt.sign({ _id: this._id, role: 'Entreprise' }, config.get('jwtPrivateKey'));
+    return jwt.sign({ _id: this._id, role: 'Employee' }, config.get('jwtPrivateKey'));
 }
 
-const Entreprise = mongoose.model("Entreprise", schema);
+const Employee = mongoose.model("Employee", schema);
 
-module.exports.Entreprise = Entreprise;
-module.exports.validateEntreprise = Joi.object({
+module.exports.Employee = Employee;
+module.exports.validateEmployee = Joi.object({
     Name: Joi.string().min(10).max(200).required(),
     phone: Joi.string().min(8).max(20).required(),
     Email: Joi.string().min(10).max(100).required(),
     Address: Joi.string().min(10).max(255).required(),
-    employees: Joi.array().items(Joi.objectId()),
+    Entreprise: Joi.objectId(),
     password: Joi.string().min(5).max(1024).required()
 });

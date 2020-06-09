@@ -31,6 +31,8 @@ router.post("/", async (req, res) => {
 
     // turn those into a middleware
 
+
+    // verify if the employees ids valid 
     let entreprise = new Entreprise({
         Name: req.body.Name,
         phone: req.body.phone,
