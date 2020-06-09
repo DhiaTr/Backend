@@ -38,7 +38,17 @@ const schema = mongoose.Schema({
     maxlength: 100,
     required: true,
   },
+  password: {
+    type: String,
+    minlength: 5,
+    maxlength: 1024,
+    required: true,
+  }
 });
+
+schema.methods.generateAuthToken = function () {
+  return jwt.sign({ _id: this._id, role: 'guardian' }, config.get('jwtPrivateKey'));
+}
 
 const Guardian = mongoose.model("Guardian", schema);
 
@@ -50,4 +60,5 @@ module.exports.validateGuardian = Joi.object({
   Email: Joi.string().min(10).max(100).required(),
   Address: Joi.string().min(10).max(255).required(),
   GuardianRelation: Joi.string().min(5).max(100).required(),
+  password: Joi.string().min(5).max(1024).required()
 });

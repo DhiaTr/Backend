@@ -43,7 +43,18 @@ const schema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Guardian",
   },
+  password: {
+    type: String,
+    minlength: 5,
+    maxlength: 1024,
+    required: true,
+  }
+
 });
+
+schema.methods.generateAuthToken = function () {
+  return jwt.sign({ _id: this._id, role: 'student' }, config.get('jwtPrivateKey'));
+}
 
 const Student = mongoose.model("Student", schema);
 
@@ -56,4 +67,5 @@ module.exports.validateStudent = Joi.object({
   Address: Joi.string().min(10).max(255).required(),
   BirthDate: Joi.string().required(),
   guardian: Joi.objectId(),
+  Address: Joi.string().min(5).max(1024).required(),
 });
