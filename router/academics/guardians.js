@@ -2,10 +2,8 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 
-const {
-  Guardian,
-  validateGuardian,
-} = require("../../models/academics/guardian");
+const { Guardian, validateGuardian } = require("../../models/academics/guardian");
+const { Student } = require("../../models/academics/student");
 
 router.get("/", async (req, res) => {
   res.send(await Guardian.find());
@@ -25,6 +23,12 @@ router.post("/", async (req, res) => {
   const { error } = validateGuardian.validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
+  let MailCheck = await Student.findOne({ Email: req.body.Email });
+  if (MailCheck) return res.status(400).send('user with the given mail already existant');
+
+  MailCheck = await Guardian.findOne({ Email: req.body.Email });
+  if (MailCheck) return res.status(400).send(' user with the given mail already existant');
+
   const guardian = new Guardian({
     Name: req.body.Name,
     phone: req.body.phone,
@@ -37,6 +41,8 @@ router.post("/", async (req, res) => {
   res.send(await guardian.save());
 });
 
+// add password in post and put 
+
 router.put("/:id", async (req, res) => {
   const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
   if (!idStatus) return res.status(400).send("invalid id.");
@@ -46,6 +52,12 @@ router.put("/:id", async (req, res) => {
 
   const { error } = validateGuardian.validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
+
+  let MailCheck = await Student.findOne({ Email: req.body.Email });
+  if (MailCheck) return res.status(400).send('user with the given mail already existant');
+
+  MailCheck = await Guardian.findOne({ Email: req.body.Email });
+  if (MailCheck) return res.status(400).send(' user with the given mail already existant');
 
   guardian = await Guardian.findByIdAndUpdate(
     req.params.id,

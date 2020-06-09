@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const Joi = require("@hapi/joi");
+const jwt = require('jsonwebtoken');
+const config = require('config');
 Joi.objectId = require("joi-objectid")(Joi);
 
 const schema = mongoose.Schema({
@@ -67,5 +69,5 @@ module.exports.validateStudent = Joi.object({
   Address: Joi.string().min(10).max(255).required(),
   BirthDate: Joi.string().required(),
   guardian: Joi.objectId(),
-  Address: Joi.string().min(5).max(1024).required(),
+  password: Joi.string().min(5).max(1024).required()
 });

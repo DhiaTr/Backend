@@ -21,13 +21,23 @@ router.post('/', async (req, res) => {
     const guardian = await Guardian.findOne({ Email: req.body.Email });
     if (!guardian && !student) return res.status(400).send('Invalid email or password');
 
-    const validate = '';
-    if (guardian) validate = await bcrypt.compare(req.body.password, guardian.password);
-    else if (student) validate = await bcrypt.compare(req.body.password, student.password);
+    let validate = '';
+    if (guardian) {
+        console.log(guardian);
+        console.log(req.body.password);
+        console.log(guardian.password);
+        validate = await bcrypt.compare(req.body.password, guardian.password);
+    }
+    else if (student) {
+        console.log(student);
+        console.log(req.body.password);
+        console.log(student.password);
+        validate = await bcrypt.compare(req.body.password, student.password);
+    }
 
     if (!validate) return res.status(400).send('invalid email or password');
 
-    const token = '';
+    let token = '';
     if (guardian) token = guardian.generateAuthToken();
     else if (student) token = student.generateAuthToken();
 

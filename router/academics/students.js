@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
+const bcrypt = require('bcrypt');
 
 const { Student, validateStudent } = require("../../models/academics/student");
 const { Guardian } = require("../../models/academics/guardian");
@@ -26,6 +27,12 @@ router.post("/", async (req, res) => {
   const guardian = await Guardian.findById(req.body.guardian);
   if (!guardian) return res.status(400).send("invalid guardian");
 
+  let MailCheck = await Student.findOne({ Email: req.body.Email });
+  if (MailCheck) return res.status(400).send('user with the given mail already existant');
+
+  MailCheck = await Guardian.findOne({ Email: req.body.Email });
+  if (MailCheck) return res.status(400).send(' user with the given mail already existant');
+
   const student = new Student({
     Name: req.body.Name,
     phone: req.body.phone,
@@ -35,8 +42,11 @@ router.post("/", async (req, res) => {
     Gender: req.body.Gender,
     guardian: req.body.guardian,
   });
+  const salt = await bcrypt.genSalt(10);
+  student.password = await bcrypt.hash(req.body.password, salt);
+  const token = student.generateAuthToken();
 
-  res.send(await student.save());
+  res.header('x-auth-token', token).send(await student.save());
 });
 
 router.put("/:id", async (req, res) => {
@@ -52,6 +62,15 @@ router.put("/:id", async (req, res) => {
   const guardian = await Guardian.findById(req.body.guardian);
   if (!guardian) return res.status(400).send("invalid guardian");
 
+  let MailCheck = await Student.findOne({ Email: req.body.Email });
+  if (MailCheck) return res.status(400).send('user with the given mail already existant');
+
+  MailCheck = await Guardian.findOne({ Email: req.body.Email });
+  if (MailCheck) return res.status(400).send(' user with the given mail already existant');
+
+  const salt = await bcrypt.genSalt(10);
+  const password = await bcrypt.hash(req.body.password, salt);
+
   student = await Student.findByIdAndUpdate(
     req.params.id,
     {
@@ -62,6 +81,7 @@ router.put("/:id", async (req, res) => {
       Address: req.body.Address,
       Gender: req.body.Gender,
       guardian: req.body.guardian,
+      password: password
     },
     {
       new: true,
@@ -83,4 +103,3 @@ router.delete("/:id", async (req, res) => {
 });
 
 module.exports = router;
-// in post check if student already exists through mail and age?
