@@ -54,10 +54,6 @@ const schema = mongoose.Schema({
 
 });
 
-schema.methods.generateAuthToken = function () {
-  return jwt.sign({ _id: this._id, role: 'student' }, config.get('jwtPrivateKey'));
-}
-
 const Student = mongoose.model("Student", schema);
 
 module.exports.Student = Student;

@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-    res.send(await Media.find({ _id: id }));
+    res.send(await Media.find({ _id: req.params.id }));
 });
 
 router.post('/', upload.single('image'), async (req, res) => {

@@ -4,12 +4,15 @@ const mongoose = require("mongoose");
 const bcrypt = require('bcrypt');
 
 const { Entreprise, validateEntreprise } = require("../../models/academics/Entreprise");
+const { User } = require('../../models/auth/user');
 
-router.get("/", async (req, res) => {
+const auth = require("../../middlewares/Auth");
+
+router.get("/", auth, async (req, res) => {
     res.send(await Entreprise.find());
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send("invalid id.");
 
@@ -19,53 +22,46 @@ router.get("/:id", async (req, res) => {
     res.send(entreprise);
 });
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
     const { error } = validateEntreprise.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    // let MailCheck = await Student.findOne({ Email: req.body.Email });
-    // if (MailCheck) return res.status(400).send('user with the given mail already existant');
+    MailCheck = await User.findOne({ Email: req.body.Email });
+    if (MailCheck) return res.status(400).send(' user with the given mail already existant');
 
-    // MailCheck = await Guardian.findOne({ Email: req.body.Email });
-    // if (MailCheck) return res.status(400).send(' user with the given mail already existant');
-
-    // turn those into a middleware
-
-
-    // verify if the employees ids valid 
-    let entreprise = new Entreprise({
+    const entreprise = new Entreprise({
         Name: req.body.Name,
         phone: req.body.phone,
         Email: req.body.Email,
         Address: req.body.Address,
         employees: req.body.employees,
     });
+
+    const user = new User({
+        Email: req.body.Email,
+        Role: 'entreprise'
+    });
     const salt = await bcrypt.genSalt(10);
-    entreprise.password = await bcrypt.hash(req.body.password, salt);
-    const token = entreprise.generateAuthToken();
+    entreprise.password = user.password = await bcrypt.hash(req.body.password, salt);
 
-    res.header('x-auth-token', token).send(await entreprise.save());
+    await user.save();
+    await entreprise.save();
 
-
-    res.send(await entreprise.save());
+    res.send(entreprise);
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send("invalid id.");
 
     let entreprise = await Entreprise.findById(req.params.id);
     if (!entreprise) return res.status(404).send("entreprise not found.");
 
+    let user = await User.findOne({ Email: entreprise.Email });
+    if (!user) user = await new User({ Email: entreprise.Email, Role: 'entreprise', password: entreprise.password }).save();
+
     const { error } = validateEntreprise.validate(req.body);
     if (error) return res.status(400).send(error.message);
-
-    // let MailCheck = await Student.findOne({ Email: req.body.Email });
-    // if (MailCheck) return res.status(400).send('user with the given mail already existant');
-
-    // MailCheck = await Guardian.findOne({ Email: req.body.Email });
-    // if (MailCheck) return res.status(400).send(' user with the given mail already existant');
-
 
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(req.body.password, salt);
@@ -85,15 +81,24 @@ router.put("/:id", async (req, res) => {
         }
     );
 
+    user = await User.findByIdAndUpdate(user._id, {
+        Email: req.body.Email,
+        Role: 'entreprise',
+        password: password
+    });
+
     res.send(entreprise);
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send("invalid id.");
 
     let entreprise = await Entreprise.findById(req.params.id);
     if (!entreprise) return res.status(404).send("entreprise not found.");
+
+    const user = await User.findOne({ Email: entreprise.Email });
+    if (user) await User.findByIdAndDelete(user._id);
 
     entreprise = await Entreprise.findByIdAndDelete(req.params.id);
     res.send(entreprise);

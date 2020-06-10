@@ -5,12 +5,15 @@ const bcrypt = require('bcrypt');
 
 const { Employee, validateEmployee } = require("../../models/academics/employee");
 const { Entreprise } = require("../../models/academics/Entreprise");
+const { User } = require('../../models/auth/user');
 
-router.get("/", async (req, res) => {
+const auth = require("../../middlewares/Auth");
+
+router.get("/", auth, async (req, res) => {
     res.send(await Employee.find());
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send("invalid id.");
 
@@ -20,57 +23,53 @@ router.get("/:id", async (req, res) => {
     res.send(employee);
 });
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
     const { error } = validateEmployee.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    // let MailCheck = await Student.findOne({ Email: req.body.Email });
-    // if (MailCheck) return res.status(400).send('user with the given mail already existant');
-
-    // MailCheck = await Guardian.findOne({ Email: req.body.Email });
-    // if (MailCheck) return res.status(400).send(' user with the given mail already existant');
-
-    // turn those into a middleware
+    MailCheck = await User.findOne({ Email: req.body.Email });
+    if (MailCheck) return res.status(400).send('user with the given mail already existant');
 
     const entreprise = await Entreprise.findById(req.body.Entreprise);
     if (!entreprise) return res.status(400).send("invalid Entreprise.");
 
-    let employee = new Employee({
+    const employee = new Employee({
         Name: req.body.Name,
         phone: req.body.phone,
         Email: req.body.Email,
         Address: req.body.Address,
         Entreprise: req.body.Entreprise,
     });
+
+    const user = new User({
+        Email: req.body.Email,
+        Role: 'employee'
+    });
+
     const salt = await bcrypt.genSalt(10);
-    employee.password = await bcrypt.hash(req.body.password, salt);
-    const token = employee.generateAuthToken();
+    employee.password = user.password = await bcrypt.hash(req.body.password, salt);
 
-    res.header('x-auth-token', token).send(await employee.save());
+    await user.save();
+    await employee.save();
 
-
-    res.send(await employee.save());
+    res.send(employee);
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send("invalid id.");
 
     let employee = await Employee.findById(req.params.id);
     if (!employee) return res.status(404).send("Employee not found.");
 
+    let user = await User.findOne({ Email: employee.Email });
+    if (!user) user = await new User({ Email: employee.Email, Role: 'employee', password: employee.password }).save();
+
     const { error } = validateEmployee.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
     const entreprise = await Entreprise.findById(req.body.Entreprise);
     if (!entreprise) return res.status(400).send("invalid Entreprise.");
-
-    // let MailCheck = await Student.findOne({ Email: req.body.Email });
-    // if (MailCheck) return res.status(400).send('user with the given mail already existant');
-
-    // MailCheck = await Guardian.findOne({ Email: req.body.Email });
-    // if (MailCheck) return res.status(400).send(' user with the given mail already existant');
-
 
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(req.body.password, salt);
@@ -90,15 +89,24 @@ router.put("/:id", async (req, res) => {
         }
     );
 
+    user = await User.findByIdAndUpdate(user._id, {
+        Email: req.body.Email,
+        Role: 'employee',
+        password: password
+    });
+
     res.send(employee);
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send("invalid id.");
 
     let employee = await Employee.findById(req.params.id);
     if (!employee) return res.status(404).send("employee not found.");
+
+    const user = await User.findOne({ Email: employee.Email });
+    if (user) await User.findByIdAndDelete(user._id);
 
     employee = await Employee.findByIdAndDelete(req.params.id);
     res.send(employee);

@@ -5,12 +5,15 @@ const bcrypt = require('bcrypt');
 
 const { Student, validateStudent } = require("../../models/academics/student");
 const { Guardian } = require("../../models/academics/guardian");
+const { User } = require('../../models/auth/user');
 
-router.get("/", async (req, res) => {
+const auth = require("../../middlewares/Auth");
+
+router.get("/", auth, async (req, res) => {
   res.send(await Student.find());
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
   if (!idStatus) return res.status(400).send("invalid id.");
 
@@ -20,18 +23,15 @@ router.get("/:id", async (req, res) => {
   res.send(student);
 });
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const { error } = validateStudent.validate(req.body);
   if (error) return res.status(400).send(error.message);
 
   const guardian = await Guardian.findById(req.body.guardian);
   if (!guardian) return res.status(400).send("invalid guardian");
 
-  let MailCheck = await Student.findOne({ Email: req.body.Email });
+  const MailCheck = await User.findOne({ Email: req.body.Email });
   if (MailCheck) return res.status(400).send('user with the given mail already existant');
-
-  MailCheck = await Guardian.findOne({ Email: req.body.Email });
-  if (MailCheck) return res.status(400).send(' user with the given mail already existant');
 
   const student = new Student({
     Name: req.body.Name,
@@ -42,31 +42,35 @@ router.post("/", async (req, res) => {
     Gender: req.body.Gender,
     guardian: req.body.guardian,
   });
-  const salt = await bcrypt.genSalt(10);
-  student.password = await bcrypt.hash(req.body.password, salt);
-  const token = student.generateAuthToken();
 
-  res.header('x-auth-token', token).send(await student.save());
+  const user = new User({
+    Email: req.body.Email,
+    Role: 'student'
+  });
+  const salt = await bcrypt.genSalt(10);
+  user.password = student.password = await bcrypt.hash(req.body.password, salt);
+
+  await user.save();
+  await student.save();
+
+  res.send(student);
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
   if (!idStatus) return res.status(400).send("invalid id.");
 
   let student = await Student.findById(req.params.id);
   if (!student) return res.status(404).send("student not found.");
 
+  let user = await User.findOne({ Email: student.Email });
+  if (!user) user = await new User({ Email: student.Email, Role: 'student', password: student.password }).save();
+
   const { error } = validateStudent.validate(req.body);
   if (error) return res.status(400).send(error.message);
 
   const guardian = await Guardian.findById(req.body.guardian);
   if (!guardian) return res.status(400).send("invalid guardian");
-
-  let MailCheck = await Student.findOne({ Email: req.body.Email });
-  if (MailCheck) return res.status(400).send('user with the given mail already existant');
-
-  MailCheck = await Guardian.findOne({ Email: req.body.Email });
-  if (MailCheck) return res.status(400).send(' user with the given mail already existant');
 
   const salt = await bcrypt.genSalt(10);
   const password = await bcrypt.hash(req.body.password, salt);
@@ -88,15 +92,24 @@ router.put("/:id", async (req, res) => {
     }
   );
 
+  await User.findByIdAndUpdate(user._id, {
+    Email: student.Email,
+    Role: 'student',
+    password: student.password
+  })
+
   res.send(student);
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
   if (!idStatus) return res.status(400).send("invalid id.");
 
   let student = await Student.findById(req.params.id);
   if (!student) return res.status(404).send("student not found.");
+
+  const user = await User.findOne({ Email: student.Email });
+  if (user) await User.findByIdAndDelete(user._id);
 
   student = await Student.findByIdAndDelete(req.params.id);
   res.send(student);

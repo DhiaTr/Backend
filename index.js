@@ -1,8 +1,10 @@
 const express = require("express");
 const app = express();
 
+
 app.use("/uploads", express.static("uploads"));
 app.use(express.json());
+
 require("./startup/db")();
 require("./startup/config")();
 
@@ -36,9 +38,7 @@ app.use("/api/students", students);
 app.use("/api/entreprises", entreprises);
 app.use("/api/employees", Employees);
 
-
 app.use("/api/auth", Auth);
-
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () =>
