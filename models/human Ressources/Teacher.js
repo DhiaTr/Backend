@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const Joi = require("@hapi/joi");
-const jwt = require('jsonwebtoken');
-const config = require('config');
+Joi.objectId = require("joi-objectid")(Joi);
 
 const schema = mongoose.Schema({
     Name: {
@@ -16,7 +15,7 @@ const schema = mongoose.Schema({
         maxlength: 20,
         required: true,
     },
-    Occupation: {
+    Specialty: {
         type: String,
         minlength: 10,
         maxlength: 100,
@@ -34,12 +33,13 @@ const schema = mongoose.Schema({
         maxlength: 255,
         required: true,
     },
-    role: {
+    Classes: [{
         type: String,
         minlength: 5,
-        maxlength: 100,
+        maxlength: 1024,
         required: true,
-    },
+        // to be changed to class type
+    }],
     password: {
         type: String,
         minlength: 5,
@@ -48,19 +48,16 @@ const schema = mongoose.Schema({
     },
 });
 
-schema.methods.generateAuthToken = function () {
-    return jwt.sign({ _id: this._id, role: this.role }, config.get('jwtPrivateKey'));
-}
 
-const Guardian = mongoose.model("Guardian", schema);
+const Teacher = mongoose.model("Teacher", schema);
 
-module.exports.Guardian = Guardian;
-module.exports.validateGuardian = Joi.object({
+module.exports.Teacher = Teacher;
+module.exports.validateTeacher = Joi.object({
     Name: Joi.string().min(10).max(200).required(),
     phone: Joi.string().min(8).max(20).required(),
-    Occupation: Joi.string().min(10).max(100).required(),
+    Specialty: Joi.string().min(10).max(100).required(),
     Email: Joi.string().min(10).max(100).required(),
     Address: Joi.string().min(10).max(255).required(),
-    GuardianRelation: Joi.string().min(5).max(100).required(),
+    Classes: Joi.array().items(Joi.objectId()),
     password: Joi.string().min(5).max(1024).required()
 });

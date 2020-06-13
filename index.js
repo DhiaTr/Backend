@@ -23,6 +23,8 @@ const students = require("./router/academics/students");
 const Employees = require("./router/academics/Employees");
 const Auth = require("./router/academics/login");
 
+const admins = require('./router/Human Ressources/admins');
+
 
 app.use("/api/contactInfo", contactInfo);
 app.use("/api/menuItems", menuItems);
@@ -37,8 +39,9 @@ app.use("/api/guardians", guardians);
 app.use("/api/students", students);
 app.use("/api/entreprises", entreprises);
 app.use("/api/employees", Employees);
-
 app.use("/api/auth", Auth);
+
+app.use("/api/admins", admins);
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () =>
