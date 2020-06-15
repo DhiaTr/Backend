@@ -37,6 +37,7 @@ router.post('/', async (req, res) => {
 
     const staff = new Staff({
         Email: req.body.Email,
+        Role: 'admin'
     });
 
     const salt = await bcrypt.genSalt(10);
@@ -56,7 +57,7 @@ router.put('/:id', async (req, res) => {
     if (!admin) return res.status(404).send("admin not found.");
 
     let staff = await Staff.findOne({ Email: admin.Email });
-    if (!staff) staff = await new Staff({ Email: admin.Email, password: admin.password }).save();
+    if (!staff) staff = await new Staff({ Email: admin.Email, Role: 'admin', password: admin.password }).save();
 
     const { error } = validateAdmin.validate(req.body);
     if (error) return res.status(400).send(error.message);
@@ -96,10 +97,5 @@ router.delete('/:id', async (req, res) => {
     admin = await Admin.findByIdAndDelete(req.params.id);
     res.send(admin);
 });
-
-
-
-
-
 
 module.exports = router;

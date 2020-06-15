@@ -24,6 +24,8 @@ const Employees = require("./router/academics/Employees");
 const Auth = require("./router/academics/login");
 
 const admins = require('./router/Human Ressources/admins');
+const teachers = require('./router/Human Ressources/teachers');
+const staffAuth = require('./router/Human Ressources/auth');
 
 
 app.use("/api/contactInfo", contactInfo);
@@ -42,6 +44,8 @@ app.use("/api/employees", Employees);
 app.use("/api/auth", Auth);
 
 app.use("/api/admins", admins);
+app.use("/api/teachers", teachers);
+app.use("/api/staffAuth", staffAuth);
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () =>

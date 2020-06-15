@@ -11,6 +11,12 @@ const schema = mongoose.Schema({
         maxlength: 200,
         required: true,
     },
+    Role: {
+        type: String,
+        minlength: 5,
+        maxlength: 100,
+        required: true,
+    },
     password: {
         type: String,
         minlength: 5,
