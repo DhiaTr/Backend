@@ -18,6 +18,7 @@ const pages = require("./router/frontCms/pages");
 const formations = require("./router/Academics/formations");
 const classes = require('./router/Academics/classes');
 const subjects = require('./router/Academics/subjects');
+const sessions = require('./router/Academics/sessions');
 
 const guardians = require("./router/Clients/guardians");
 const entreprises = require("./router/Clients/Entreprises");
@@ -40,6 +41,7 @@ app.use("/api/pages", pages);
 app.use("/api/formations", formations);
 app.use('/api/classes', classes);
 app.use('/api/subjects', subjects);
+app.use('/api/sessions', sessions);
 
 app.use("/api/guardians", guardians);
 app.use("/api/students", students);
