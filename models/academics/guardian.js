@@ -1,9 +1,14 @@
 const mongoose = require("mongoose");
 const Joi = require("@hapi/joi");
-const jwt = require('jsonwebtoken');
-const config = require('config');
+Joi.objectId = require("joi-objectid")(Joi);
 
 const schema = mongoose.Schema({
+  CIN: {
+    type: String,
+    minlength: 8,
+    maxlength: 8,
+    required: true,
+  },
   Name: {
     type: String,
     minlength: 10,
@@ -34,12 +39,18 @@ const schema = mongoose.Schema({
     maxlength: 255,
     required: true,
   },
-  GuardianRelation: {
-    type: String,
-    minlength: 5,
-    maxlength: 100,
-    required: true,
-  },
+  Parish: [{
+    Relation: {
+      type: String,
+      minlength: 3,
+      maxlength: 100,
+      required: true,
+    },
+    studentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Student",
+    }
+  }],
   password: {
     type: String,
     minlength: 5,
@@ -53,11 +64,15 @@ const Guardian = mongoose.model("Guardian", schema);
 
 module.exports.Guardian = Guardian;
 module.exports.validateGuardian = Joi.object({
+  CIN: Joi.string().min(8).max(8).required(),
   Name: Joi.string().min(10).max(200).required(),
   phone: Joi.string().min(8).max(20).required(),
   Occupation: Joi.string().min(10).max(100).required(),
   Email: Joi.string().min(10).max(100).required(),
   Address: Joi.string().min(10).max(255).required(),
-  GuardianRelation: Joi.string().min(5).max(100).required(),
+  Parish: Joi.array().items({
+    Relation: Joi.string().min(3).max(100).required(),
+    studentId: Joi.objectId()
+  }),
   password: Joi.string().min(5).max(1024).required()
 });

@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const Joi = require("@hapi/joi");
 const jwt = require('jsonwebtoken');
 const config = require('config');
-const { boolean } = require("@hapi/joi");
 
 const schema = mongoose.Schema({
     Email: {

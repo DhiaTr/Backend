@@ -15,17 +15,19 @@ const media = require("./router/frontCms/media");
 const gallerieImages = require("./router/frontCms/gallerieImages");
 const pages = require("./router/frontCms/pages");
 
-const formations = require("./router/formations/formations");
+const formations = require("./router/Academics/formations");
+const classes = require('./router/Academics/classes');
+const subjects = require('./router/Academics/subjects');
 
-const guardians = require("./router/academics/guardians");
-const entreprises = require("./router/academics/Entreprises");
-const students = require("./router/academics/students");
-const Employees = require("./router/academics/Employees");
-const Auth = require("./router/academics/login");
+const guardians = require("./router/Clients/guardians");
+const entreprises = require("./router/Clients/Entreprises");
+const students = require("./router/Clients/students");
+const Employees = require("./router/Clients/Employees");
+const clientLogin = require("./router/auth/client");
 
 const admins = require('./router/Human Ressources/admins');
 const teachers = require('./router/Human Ressources/teachers');
-const staffAuth = require('./router/Human Ressources/auth');
+const staffAuth = require('./router/auth/mods');
 
 
 app.use("/api/contactInfo", contactInfo);
@@ -36,12 +38,14 @@ app.use("/api/gallerieImages", gallerieImages);
 app.use("/api/pages", pages);
 
 app.use("/api/formations", formations);
+app.use('/api/classes', classes);
+app.use('/api/subjects', subjects);
 
 app.use("/api/guardians", guardians);
 app.use("/api/students", students);
 app.use("/api/entreprises", entreprises);
 app.use("/api/employees", Employees);
-app.use("/api/auth", Auth);
+app.use("/api/auth", clientLogin);
 
 app.use("/api/admins", admins);
 app.use("/api/teachers", teachers);
