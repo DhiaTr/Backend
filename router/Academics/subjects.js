@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const { Subject, validateSubject } = require('../../models/academics/subject');
-
+const { Exam } = require('../../models/academics/exam');
 
 router.get('/', async (req, res) => {
     res.send(await Subject.find());
@@ -23,9 +23,16 @@ router.post('/', async (req, res) => {
     const { error } = validateSubject.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
+    let exam;
+    for (let i = 0; i < req.body.exams.length; i++) {
+        exam = await Exam.findById(req.body.exams[i]);
+        if (!exam) return res.status(400).send('invalid exam.');
+    }
+
     const subject = new Subject({
         Name: req.body.Name,
-        Description: req.body.Description
+        Description: req.body.Description,
+        exams: req.body.exams
     });
 
     res.send(await subject.save());
@@ -41,9 +48,16 @@ router.put('/:id', async (req, res) => {
     const { error } = validateSubject.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
+    let exam;
+    for (let i = 0; i < req.body.exams.length; i++) {
+        exam = await Exam.findById(req.body.exams[i]);
+        if (!exam) return res.status(400).send('invalid exam.');
+    }
+
     subject = await Subject.findByIdAndUpdate(req.params.id, {
         Name: req.body.Name,
-        Description: req.body.Description
+        Description: req.body.Description,
+        exams: req.body.exams
     }, {
         new: true
     });

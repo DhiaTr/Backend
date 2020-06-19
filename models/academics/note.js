@@ -1,34 +1,29 @@
-// const mongoose = require('mongoose');
-// const Joi = require('@hapi/joi');
-// Joi.objectId = require('joi-objectid')(Joi);
+const mongoose = require('mongoose');
+const Joi = require('@hapi/joi');
+Joi.objectId = require('joi-objectid')(Joi);
 
-// const schema = mongoose.Schema({
-//     Exam: {
-//         type: String,
-//         minlength: 3,
-//         maxlength: 30,
-//         required: true
-//     },
-//     subject: {
-//         type: mongoose.Schema.Types.ObjectId,
-//         ref: "Student",
-//     },
-//     startDateTime: {
-//         type: Date,
-//         required: true
-//     },
-//     endDateTime: {
-//         type: Date,
-//         required: true
-//     },
-// });
+const schema = mongoose.Schema({
+    exam: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Exam",
+    },
+    student: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Student",
+    },
+    value: {
+        type: Number,
+        min: 0,
+        max: 20,
+        required: true
+    },
+});
 
-// const Session = mongoose.model('Session', schema);
+const Note = mongoose.model('Note', schema);
 
-// module.exports.Session = Session;
-// module.exports.validateSession = Joi.object({
-//     class: Joi.objectId(),
-//     subject: Joi.objectId(),
-//     startDateTime: Joi.date().required(),
-//     endDateTime: Joi.date().required(),
-// });
+module.exports.Note = Note;
+module.exports.validateNote = Joi.object({
+    exam: Joi.objectId(),
+    student: Joi.objectId(),
+    value: Joi.number().min(0).max(20).required()
+});
