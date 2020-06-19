@@ -21,6 +21,7 @@ const subjects = require('./router/Academics/subjects');
 const sessions = require('./router/Academics/sessions');
 const exams = require('./router/Academics/exams');
 const notes = require('./router/Academics/notes');
+const abscences = require('./router/Academics/abscences');
 
 const guardians = require("./router/Clients/guardians");
 const entreprises = require("./router/Clients/Entreprises");
@@ -46,6 +47,7 @@ app.use('/api/subjects', subjects);
 app.use('/api/sessions', sessions);
 app.use('/api/exams', exams);
 app.use('/api/notes', notes);
+app.use('/api/abscences', abscences);
 
 app.use("/api/guardians", guardians);
 app.use("/api/students", students);
