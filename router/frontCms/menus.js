@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+
 const { Menu, validateMenu } = require('../../models/frontCms/menu');
+const { Page } = require('../../models/frontCms/page');
 
 router.get('/', async (req, res) => {
     res.send(await Menu.find());
@@ -41,11 +43,21 @@ router.put('/:id', async (req, res) => {
     const { error } = validateMenu.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    menu = new Menu({
+    let page;
+    for (let i = 0; i < req.body.items.length; i++) {
+        if (!req.body.items[i].Page) return res.status(400).send('page id is required.');
+        page = await Page.findById(req.body.items[i].Page);
+        if (!page) return res.status(400).send('invalid page.');
+    }
+
+    menu = await Menu.findByIdAndUpdate(req.params.id, {
         Name: req.body.Name,
         Description: req.body.Description,
+        items: req.body.items,
+    }, {
+        new: true
     });
-    res.send(await menu.save());
+    res.send(menu);
 });
 
 router.delete('/:id', async (req, res) => {
@@ -58,6 +70,5 @@ router.delete('/:id', async (req, res) => {
     await Menu.findByIdAndDelete(req.params.id);
     res.send(menu);
 });
-
 
 module.exports = router;
