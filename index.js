@@ -24,9 +24,7 @@ const notes = require('./router/Academics/notes');
 const abscences = require('./router/Academics/abscences');
 
 const guardians = require("./router/Clients/guardians");
-const entreprises = require("./router/Clients/Entreprises");
 const students = require("./router/Clients/students");
-const Employees = require("./router/Clients/Employees");
 const clientLogin = require("./router/auth/client");
 
 const admins = require('./router/Human Ressources/admins');
@@ -51,8 +49,6 @@ app.use('/api/abscences', abscences);
 
 app.use("/api/guardians", guardians);
 app.use("/api/students", students);
-app.use("/api/entreprises", entreprises);
-app.use("/api/employees", Employees);
 app.use("/api/auth", clientLogin);
 
 app.use("/api/admins", admins);

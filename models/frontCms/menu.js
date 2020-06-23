@@ -18,12 +18,8 @@ const schema = mongoose.Schema({
 
 const Menu = mongoose.model('Menu', schema);
 
-function validateMenu() {
-    return Joi.object({
-        Name: Joi.string().min(5).max(100).required(),
-        Description: Joi.string().min(10).max(150).required()
-    })
-}
-
 module.exports.Menu = Menu;
-module.exports.validateMenu = validateMenu;
+module.exports.validateMenu = Joi.object({
+    Name: Joi.string().min(5).max(100).required(),
+    Description: Joi.string().min(10).max(150).required()
+});

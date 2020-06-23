@@ -17,10 +17,10 @@ router.put('/', async (req, res) => {
         phone2: req.body.phone2,
         address: req.body.address,
         email: req.body.email,
-        FacebookURL: req.body.FacebookURL,
-        TwitterURL: req.body.TwitterURL,
-        InstagramURL: req.body.InstagramURL,
-        LinkedinURL: req.body.LinkedinURL
+        FacebookID: req.body.FacebookID,
+        TwitterID: req.body.TwitterID,
+        InstagramID: req.body.InstagramID,
+        LinkedinID: req.body.LinkedinID
     });
     res.send(await contactInfo.save());
 });

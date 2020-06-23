@@ -26,28 +26,28 @@ const schema = mongoose.Schema({
         maxlength: 255,
         required: true
     },
-    FacebookURL: {
+    FacebookID: {
         type: String,
         minlength: 20,
-        maxlength: 1024,
+        maxlength: 255,
         required: true
     },
-    TwitterURL: {
+    TwitterID: {
         type: String,
         minlength: 20,
-        maxlength: 1024,
+        maxlength: 255,
         required: true
     },
-    InstagramURL: {
+    InstagramID: {
         type: String,
         minlength: 20,
-        maxlength: 1024,
+        maxlength: 255,
         required: true
     },
-    LinkedinURL: {
+    LinkedinID: {
         type: String,
         minlength: 20,
-        maxlength: 1024,
+        maxlength: 255,
         required: true
     }
 });
@@ -60,10 +60,10 @@ function validateContactInfo() {
         phone2: Joi.string().min(8).max(20).required(),
         address: Joi.string().min(30).max(255).required(),
         email: Joi.string().min(10).max(255).required(),
-        FacebookURL: Joi.string().min(20).max(1024).required(),
-        TwitterURL: Joi.string().min(20).max(1024).required(),
-        InstagramURL: Joi.string().min(20).max(1024).required(),
-        LinkedinURL: Joi.string().min(20).max(1024).required()
+        FacebookID: Joi.string().min(20).max(1024).required(),
+        TwitterID: Joi.string().min(20).max(1024).required(),
+        InstagramID: Joi.string().min(20).max(1024).required(),
+        LinkedinID: Joi.string().min(20).max(1024).required()
     });
 }
 
