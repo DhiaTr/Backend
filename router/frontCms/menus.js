@@ -3,10 +3,9 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const { Menu, validateMenu } = require('../../models/frontCms/menu');
-const { Page } = require('../../models/frontCms/page');
 
 router.get('/', async (req, res) => {
-    res.send(await Menu.find());
+    res.send(await Menu.find().populate('items.Page'));
 });
 
 router.get('/:id', async (req, res) => {
@@ -14,7 +13,7 @@ router.get('/:id', async (req, res) => {
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send('invalid id.');
 
-    let menu = await Menu.findById(req.params.id);
+    let menu = await Menu.findById(req.params.id).populate('items.Page');
     if (!menu) return res.status(400).send('invalid menu.');
 
     res.send(menu);
@@ -28,6 +27,7 @@ router.post('/', async (req, res) => {
     const menu = new Menu({
         Name: req.body.Name,
         Description: req.body.Description,
+        items: req.body.items
     });
     res.send(await menu.save());
 });
@@ -53,6 +53,7 @@ router.put('/:id', async (req, res) => {
     menu = await Menu.findByIdAndUpdate(req.params.id, {
         Name: req.body.Name,
         Description: req.body.Description,
+        items: req.body.items
     }, {
         new: true
     });
