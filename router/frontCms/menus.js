@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const { Menu, validateMenu } = require('../../models/frontCms/menu');
+const { Page } = require('../../models/frontCms/page');
 
 router.get('/', async (req, res) => {
     res.send(await Menu.find().populate('items.Page'));
@@ -24,6 +25,13 @@ router.post('/', async (req, res) => {
     const { error } = validateMenu.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
+    let page;
+    for (let i = 0; i < req.body.items.length; i++) {
+        if (!req.body.items[i].Page) return res.status(400).send('page id is required.');
+        page = await Page.findById(req.body.items[i].Page);
+        if (!page) return res.status(400).send('invalid page.');
+    }
+
     const menu = new Menu({
         Name: req.body.Name,
         Description: req.body.Description,
@@ -43,12 +51,12 @@ router.put('/:id', async (req, res) => {
     const { error } = validateMenu.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    // let page;
-    // for (let i = 0; i < req.body.items.length; i++) {
-    //     if (!req.body.items[i].Page) return res.status(400).send('page id is required.');
-    //     page = await Page.findById(req.body.items[i].Page);
-    //     if (!page) return res.status(400).send('invalid page.');
-    // }
+    let page;
+    for (let i = 0; i < req.body.items.length; i++) {
+        if (!req.body.items[i].Page) return res.status(400).send('page id is required.');
+        page = await Page.findById(req.body.items[i].Page);
+        if (!page) return res.status(400).send('invalid page.');
+    }
 
     menu = await Menu.findByIdAndUpdate(req.params.id, {
         Name: req.body.Name,

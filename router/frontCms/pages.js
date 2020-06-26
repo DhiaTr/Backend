@@ -2,18 +2,31 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-const { Page } = require('../../models/frontCms/page');
+const { Page, validatePage } = require('../../models/frontCms/page');
 const { Formation } = require('../../models/formations/formation');
 
 router.get('/', async (req, res) => {
     res.send(await Page.find());
 });
 
+router.get('/:id', async (req, res) => {
+    const pageIdStatus = mongoose.Types.ObjectId.isValid(req.params.id);
+    if (!pageIdStatus) return res.status(400).send('invalid id.');
+
+    let page = await Page.findById(req.params.id);
+    if (!page) return res.status(404).send('Page not found.');
+    res.send(await Page.findById(req.params.id));
+});
+
 router.post('/', async (req, res) => {
+
+    const { error } = validatePage.validate(req.body);
+    if (error) return res.status(400).send(error.message);
+
     const formation = new Page({
         Name: req.body.Name,
         Description: req.body.Description,
-        formations: []
+        formations: req.body.formations
     });
     res.send(await formation.save());
 });
@@ -25,6 +38,9 @@ router.put('/:id', async (req, res) => {
 
     let page = await Page.findById(req.params.id);
     if (!page) return res.status(404).send('Page not found.');
+
+    const { error } = validatePage.validate(req.body);
+    if (error) return res.status(400).send(error.message);
 
     let formations = [];
     let f = {};

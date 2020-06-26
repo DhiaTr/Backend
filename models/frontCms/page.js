@@ -43,12 +43,9 @@ const schema = mongoose.Schema({
 
 const Page = mongoose.model('Page', schema);
 
-function validatePage() {
-    return Joi.object({
-        Name: Joi.string().min(5).max(100).required(),
-        Description: Joi.string().min(10).max(150).required(),
-    })
-}
-
 module.exports.Page = Page;
-module.exports.validatePage = validatePage;
+module.exports.validatePage = Joi.object({
+    Name: Joi.string().min(5).max(100).required(),
+    Description: Joi.string().min(10).max(150).required(),
+    formations: Joi.array().items(Joi.objectId()).required(),
+});
