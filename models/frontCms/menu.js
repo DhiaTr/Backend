@@ -40,3 +40,7 @@ module.exports.validateMenu = Joi.object({
         Page: Joi.objectId()
     }).required(),
 });
+module.exports.validateItem = Joi.object({
+    Name: Joi.string().min(3).max(100).required(),
+    Page: Joi.objectId()
+});
