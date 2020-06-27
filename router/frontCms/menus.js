@@ -6,7 +6,7 @@ const { Menu, validateMenu, validateItem } = require('../../models/frontCms/menu
 const { Page } = require('../../models/frontCms/page');
 
 router.get('/', async (req, res) => {
-    res.send(await Menu.find().populate('items.Page'));
+    res.send(await Menu.find().populate('[items].Page'));
 });
 
 router.get('/:id', async (req, res) => {
@@ -14,7 +14,7 @@ router.get('/:id', async (req, res) => {
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send('invalid id.');
 
-    let menu = await Menu.findById(req.params.id).populate('items.Page');
+    let menu = await Menu.findById(req.params.id).populate('[items].Page');
     if (!menu) return res.status(400).send('invalid menu.');
 
     res.send(menu);
@@ -25,19 +25,33 @@ router.post('/', async (req, res) => {
     const { error } = validateMenu.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    let page;
-    for (let i = 0; i < req.body.items.length; i++) {
-        if (!req.body.items[i].Page) return res.status(400).send('page id is required.');
-        page = await Page.findById(req.body.items[i].Page);
-        if (!page) return res.status(400).send('invalid page.');
-    }
-
     const menu = new Menu({
         Name: req.body.Name,
         Description: req.body.Description,
-        items: req.body.items
+        items: []
     });
     res.send(await menu.save());
+});
+
+
+router.put('/:id', async (req, res) => {
+
+    const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
+    if (!idStatus) return res.status(400).send('invalid id.');
+
+    let menu = await Menu.findById(req.params.id);
+    if (!menu) return res.status(400).send('invalid menu.');
+
+    const { error } = validateMenu.validate(req.body);
+    if (error) return res.status(400).send(error.message);
+
+    menu = await Menu.findByIdAndUpdate(req.params.id, {
+        Name: req.body.Name,
+        Description: req.body.Description
+    }, {
+        new: true
+    });
+    res.send(menu);
 });
 
 router.put('/:id/addItem/', async (req, res) => {
@@ -82,34 +96,6 @@ router.put('/:menuId/deleteItem/:itemId', async (req, res) => {
     await Menu.findByIdAndUpdate(req.params.menuId, menu);
     res.send(menu);
 
-});
-
-router.put('/:id', async (req, res) => {
-
-    const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
-    if (!idStatus) return res.status(400).send('invalid id.');
-
-    let menu = await Menu.findById(req.params.id);
-    if (!menu) return res.status(400).send('invalid menu.');
-
-    const { error } = validateMenu.validate(req.body);
-    if (error) return res.status(400).send(error.message);
-
-    let page;
-    for (let i = 0; i < req.body.items.length; i++) {
-        if (!req.body.items[i].Page) return res.status(400).send('page id is required.');
-        page = await Page.findById(req.body.items[i].Page);
-        if (!page) return res.status(400).send('invalid page.');
-    }
-
-    menu = await Menu.findByIdAndUpdate(req.params.id, {
-        Name: req.body.Name,
-        Description: req.body.Description,
-        items: req.body.items
-    }, {
-        new: true
-    });
-    res.send(menu);
 });
 
 router.delete('/:id', async (req, res) => {

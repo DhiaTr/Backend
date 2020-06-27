@@ -27,16 +27,6 @@ const schema = mongoose.Schema({
             minlength: 10,
             maxlength: 150,
             required: true
-        },
-        thumbnail: {
-            type: new mongoose.Schema({
-                path: {
-                    type: String,
-                    minlength: 10,
-                    maxlength: 1024,
-                    required: true
-                }
-            })
         }
     }]
 });
@@ -46,6 +36,8 @@ const Page = mongoose.model('Page', schema);
 module.exports.Page = Page;
 module.exports.validatePage = Joi.object({
     Name: Joi.string().min(5).max(100).required(),
-    Description: Joi.string().min(10).max(150).required(),
-    formations: Joi.array().items(Joi.objectId()).required(),
+    Description: Joi.string().min(10).max(150).required()
+});
+module.exports.validateFormation = Joi.object({
+    formation: Joi.objectId(),
 });

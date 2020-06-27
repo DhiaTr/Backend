@@ -13,9 +13,9 @@ router.get('/:id', async (req, res) => {
     const pageIdStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!pageIdStatus) return res.status(400).send('invalid id.');
 
-    let page = await Page.findById(req.params.id);
+    const page = await Page.findById(req.params.id);
     if (!page) return res.status(404).send('Page not found.');
-    res.send(await Page.findById(req.params.id));
+    res.send(page);
 });
 
 router.post('/', async (req, res) => {
@@ -23,12 +23,12 @@ router.post('/', async (req, res) => {
     const { error } = validatePage.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    const formation = new Page({
+    const page = new Page({
         Name: req.body.Name,
         Description: req.body.Description,
-        formations: req.body.formations
+        formations: []
     });
-    res.send(await formation.save());
+    res.send(await page.save());
 });
 
 router.put('/:id', async (req, res) => {
@@ -42,26 +42,54 @@ router.put('/:id', async (req, res) => {
     const { error } = validatePage.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    let formations = [];
-    let f = {};
-    for (var i = 0; i < req.body.formations.length; i++) {
-        const formation = await Formation.findById(req.body.formations[i]);
-        if (!formation) return res.status(404).send('formation not found.');
-        f = {
-            Name: formation.Name,
-            Description: formation.Description,
-            thumbnail: formation.thumbnail
-        }
-        formations.push(f);
-    }
-
-    page = {
+    page = await Page.findByIdAndUpdate(req.params.id, {
         Name: req.body.Name,
         Description: req.body.Description,
-        formations: formations
-    }
-    const returnNew = { new: true };
-    res.send(await Page.findByIdAndUpdate(req.params.id, page, returnNew));
+    }, {
+        new: true
+    });
+    res.send(page);
+});
+
+router.put('/:pageId/addItem', async (req, res) => {
+
+    const pageIdStatus = mongoose.Types.ObjectId.isValid(req.params.pageId);
+    if (!pageIdStatus) return res.status(400).send('invalid id.');
+
+    let page = await Page.findById(req.params.pageId);
+    if (!page) return res.status(404).send('Page not found.');
+
+    let formation = await Formation.findById(req.body.formation);
+    if (!formation) return res.status(400).send('invalid formation.');
+
+    page.formations.push({
+        Name: formation.Name,
+        Description: formation.Description,
+    });
+
+    await Page.findByIdAndUpdate(req.params.pageId, {
+        formations: page.formations
+    });
+    res.send(page);
+});
+
+router.put('/:pageId/deleteItem/:itemId', async (req, res) => {
+
+    const pageIdStatus = mongoose.Types.ObjectId.isValid(req.params.pageId);
+    if (!pageIdStatus) return res.status(400).send('invalid page id.');
+
+    const formationIdStatus = mongoose.Types.ObjectId.isValid(req.params.itemId);
+    if (!formationIdStatus) return res.status(400).send('invalid formation id.');
+
+    let page = await Page.findById(req.params.pageId);
+    if (!page) return res.status(404).send('Page not found.');
+
+    formation = page.formations.find(f => f._id == req.params.itemId);
+    if (!formation) return res.status(400).send('formation not found');
+
+    page.formations = page.formations.filter(f => f._id != req.params.itemId)
+    await Page.findByIdAndUpdate(req.params.pageId, page);
+    res.send(page);
 
 });
 

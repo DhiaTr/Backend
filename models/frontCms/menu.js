@@ -34,13 +34,10 @@ const Menu = mongoose.model('Menu', schema);
 module.exports.Menu = Menu;
 module.exports.validateMenu = Joi.object({
     Name: Joi.string().min(5).max(100).required(),
-    Description: Joi.string().min(10).max(150).required(),
-    items: Joi.array().items({
-        Name: Joi.string().min(3).max(100).required(),
-        Page: Joi.objectId()
-    }).required(),
+    Description: Joi.string().min(10).max(150).required()
 });
 module.exports.validateItem = Joi.object({
     Name: Joi.string().min(3).max(100).required(),
     Page: Joi.objectId()
 });
+
