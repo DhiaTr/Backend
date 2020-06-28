@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose');
 
 const { GalleryImage } = require('../../models/frontCms/galleryImg');
 const { Media } = require('../../models/frontCms/media');

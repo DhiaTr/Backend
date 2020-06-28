@@ -10,14 +10,14 @@ const { User } = require('../../models/auth/user');
 const auth = require("../../middlewares/Auth");
 
 router.get("/", auth, async (req, res) => {
-  res.send(await Student.find());
+  res.send(await Student.find().populate('guardian', 'CIN Name'));
 });
 
 router.get("/:id", auth, async (req, res) => {
   const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
   if (!idStatus) return res.status(400).send("invalid id.");
 
-  const student = await Student.findById(req.params.id);
+  const student = await Student.findById(req.params.id).populate('guardian', 'CIN Name');
   if (!student) return res.status(404).send("student not found.");
 
   res.send(student);
