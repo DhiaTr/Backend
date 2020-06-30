@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -9,16 +10,13 @@ const storage = multer.diskStorage({
         cb(null, new Date().toISOString().replace(/:/g, '') + file.originalname);
     }
 });
+// add more validation
 const upload = multer({ storage: storage });
 const { Media } = require('../../models/frontCms/media');
 
 
 router.get('/', async (req, res) => {
     res.send(await Media.find());
-});
-
-router.get('/:id', async (req, res) => {
-    res.send(await Media.find({ _id: req.params.id }));
 });
 
 router.post('/', upload.single('image'), async (req, res) => {
@@ -28,8 +26,15 @@ router.post('/', upload.single('image'), async (req, res) => {
 });
 
 router.delete('/:id', async (req, res) => {
-    const media = await Media.findByIdAndDelete(req.params.id);
+    const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
+    if (!idStatus) return res.status(400).send('invalid id.');
+
+    const media = await Media.findById(req.params.id);
+    if (!media) return res.status(404).send('media not found.');
+
+    await Media.findByIdAndDelete(req.params.id);
     res.send(media);
+    // make file deletion permenant qm
 });
 
 

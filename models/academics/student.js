@@ -30,7 +30,7 @@ const schema = mongoose.Schema({
   BirthDate: {
     type: Date,
     min: "1970-01-01",
-    max: "2008-01-01",
+    max: "2015-01-01",
     required: true,
   },
   Gender: {
@@ -65,3 +65,4 @@ module.exports.validateStudent = Joi.object({
   guardian: Joi.objectId(),
   password: Joi.string().min(5).max(1024).required()
 });
+// add birthdate min and max to validation

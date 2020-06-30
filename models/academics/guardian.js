@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Joi = require("@hapi/joi");
-Joi.objectId = require("joi-objectid")(Joi);
 
 const schema = mongoose.Schema({
   CIN: {
@@ -11,7 +10,7 @@ const schema = mongoose.Schema({
   },
   Name: {
     type: String,
-    minlength: 10,
+    minlength: 5,
     maxlength: 200,
     required: true,
   },
@@ -23,7 +22,7 @@ const schema = mongoose.Schema({
   },
   Occupation: {
     type: String,
-    minlength: 10,
+    minlength: 3,
     maxlength: 100,
     required: true,
   },
@@ -39,18 +38,6 @@ const schema = mongoose.Schema({
     maxlength: 255,
     required: true,
   },
-  Parish: [{
-    Relation: {
-      type: String,
-      minlength: 3,
-      maxlength: 100,
-      required: true,
-    },
-    studentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Student",
-    }
-  }],
   password: {
     type: String,
     minlength: 5,
@@ -65,14 +52,20 @@ const Guardian = mongoose.model("Guardian", schema);
 module.exports.Guardian = Guardian;
 module.exports.validateGuardian = Joi.object({
   CIN: Joi.string().min(8).max(8).required(),
-  Name: Joi.string().min(10).max(200).required(),
+  Name: Joi.string().min(5).max(200).required(),
   phone: Joi.string().min(8).max(20).required(),
-  Occupation: Joi.string().min(10).max(100).required(),
+  Occupation: Joi.string().min(3).max(100).required(),
   Email: Joi.string().min(10).max(100).required(),
   Address: Joi.string().min(10).max(255).required(),
-  Parish: Joi.array().items({
-    Relation: Joi.string().min(3).max(100).required(),
-    studentId: Joi.objectId()
-  }),
   password: Joi.string().min(5).max(1024).required()
 });
+
+module.exports.validateChange = Joi.object({
+  Name: Joi.string().min(5).max(200).required(),
+  phone: Joi.string().min(8).max(20).required(),
+  Occupation: Joi.string().min(3).max(100).required(),
+  Address: Joi.string().min(10).max(255).required(),
+  password: Joi.string().min(5).max(1024).required()
+});
+
+

@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const bcrypt = require('bcrypt');
 
-const { Guardian, validateGuardian } = require("../../models/academics/guardian");
+const { Guardian, validateGuardian, validateChange } = require("../../models/academics/guardian");
 const { Student } = require("../../models/academics/student");
 const { User } = require('../../models/auth/user');
 
@@ -23,6 +23,17 @@ router.get("/:id", auth, async (req, res) => {
   res.send(guardian);
 });
 
+router.get('/guardianParoisse/:id', async (req, res) => {
+  const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
+  if (!idStatus) return res.status(400).send("invalid id.");
+
+  const guardian = await Guardian.findById(req.params.id);
+  if (!guardian) return res.status(404).send("guardian not found.");
+
+  const students = await Student.find({ guardian: guardian._id });
+  res.send(students);
+});
+
 router.post("/", auth, async (req, res) => {
   const { error } = validateGuardian.validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
@@ -33,11 +44,6 @@ router.post("/", auth, async (req, res) => {
   let CINCheck = await Guardian.findOne({ CIN: req.body.CIN });
   if (CINCheck) return res.status(400).send('user with the given CIN already existant');
 
-  for (let i = 0; i < req.body.Parish.length; i++) {
-    let student = await Student.findById(req.body.Parish[i].studentId);
-    if (!student) return res.status(400).send('invalid student id');
-  }
-
   const guardian = new Guardian({
     CIN: req.body.CIN,
     Name: req.body.Name,
@@ -45,7 +51,7 @@ router.post("/", auth, async (req, res) => {
     Occupation: req.body.Occupation,
     Email: req.body.Email,
     Address: req.body.Address,
-    Parish: req.body.Parish,
+    Parish: [],
   });
 
   const user = new User({
@@ -62,73 +68,67 @@ router.post("/", auth, async (req, res) => {
   res.send(guardian);
 });
 
-// test put and delete
 
-// router.put("/:id", auth, async (req, res) => {
-//   const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
-//   if (!idStatus) return res.status(400).send("invalid id.");
+router.put("/:id", auth, async (req, res) => {
+  const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
+  if (!idStatus) return res.status(400).send("invalid id.");
 
-//   let guardian = await Guardian.findById(req.params.id);
-//   if (!guardian) return res.status(404).send("guardian not found.");
+  let guardian = await Guardian.findById(req.params.id);
+  if (!guardian) return res.status(404).send("guardian not found.");
 
-//   let user = await User.findOne({ Email: guardian.Email });
-//   if (!user) user = await new User({ Email: guardian.Email, Role: 'guardian', password: guardian.password }).save();
+  let user = await User.findOne({ Email: guardian.Email });
+  if (!user) user = await new User({ Email: guardian.Email, Role: 'guardian', password: guardian.password }).save();
 
-//   const { error } = validateGuardian.validate(req.body);
-//   if (error) return res.status(400).send(error.details[0].message);
+  const { error } = validateChange.validate(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
 
+  const salt = await bcrypt.genSalt(10);
+  const password = await bcrypt.hash(req.body.password, salt);
 
-// let CINCheck = await Guardian.findOne({ CIN: req.body.CIN });
-// if (CINCheck) return res.status(400).send('user with the given CIN already existant');
+  guardian = await Guardian.findByIdAndUpdate(
+    req.params.id,
+    {
+      Name: req.body.Name,
+      phone: req.body.phone,
+      Occupation: req.body.Occupation,
+      Address: req.body.Address,
+      password: password
+    },
+    {
+      new: true,
+    }
+  );
 
-// for (let i = 0; i < req.body.Parish.length; i++) {
-//   let student = await Student.findById(req.body.Parish[i].studentId);
-//   if (!student) return res.status(400).send('invalid student id');
-// }
-//   const salt = await bcrypt.genSalt(10);
-//   const password = await bcrypt.hash(req.body.password, salt);
+  user = await User.findByIdAndUpdate(user._id, {
+    Email: req.body.Email,
+    Role: 'guardian',
+    password: password
+  });
 
-//   guardian = await Guardian.findByIdAndUpdate(
-//     req.params.id,
-//     {
-// CIN: req.body.CIN,
-//       Name: req.body.Name,
-//       phone: req.body.phone,
-//       Occupation: req.body.Occupation,
-//       Email: req.body.Email,
-//       Address: req.body.Address,
-//       Parish: req.body.Parish,
-//       password: password
-//     },
-//     {
-//       new: true,
-//     }
-//   );
+  await user.save();
+  await guardian.save();
 
-//   user = await User.findByIdAndUpdate(user._id, {
-//     Email: req.body.Email,
-//     Role: 'guardian',
-//     password: password
-//   });
+  res.send(guardian);
+});
 
-//   await user.save();
-//   await guardian.save();
+router.delete("/:id", auth, async (req, res) => {
+  const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
+  if (!idStatus) return res.status(400).send("invalid id.");
 
-//   res.send(guardian);
-// });
+  let guardian = await Guardian.findById(req.params.id);
+  if (!guardian) return res.status(404).send("guardian not found.");
 
-// router.delete("/:id", auth, async (req, res) => {
-//   const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
-//   if (!idStatus) return res.status(400).send("invalid id.");
+  const user = await User.findOne({ Email: guardian.Email });
+  if (user) await User.findByIdAndDelete(user._id);
 
-//   let guardian = await Guardian.findById(req.params.id);
-//   if (!guardian) return res.status(404).send("guardian not found.");
+  const students = await Student.find({ guardian: guardian._id });
+  students.forEach(async student => {
+    await User.findOneAndDelete({ Email: student.Email });
+    await Student.findOneAndDelete({ Email: student.Email });
+  });
 
-//   const user = await User.findOne({ Email: guardian.Email });
-//   if (user) await User.findByIdAndDelete(user._id);
-
-//   guardian = await Guardian.findByIdAndDelete(req.params.id);
-//   res.send(guardian);
-// });
+  guardian = await Guardian.findByIdAndDelete(req.params.id);
+  res.send(guardian);
+});
 
 module.exports = router;
