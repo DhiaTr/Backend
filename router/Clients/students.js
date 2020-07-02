@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const bcrypt = require('bcrypt');
 
-const { Student, validateStudent } = require("../../models/academics/student");
+const { Student, validateStudent, validateChange } = require("../../models/academics/student");
 const { Guardian } = require("../../models/academics/guardian");
 const { User } = require('../../models/auth/user');
 
@@ -27,10 +27,10 @@ router.post("/", auth, async (req, res) => {
   const { error } = validateStudent.validate(req.body);
   if (error) return res.status(400).send(error.message);
 
-  const guardian = await Guardian.findById(req.body.guardian);
+  const guardian = await Guardian.findOne({ CIN: req.body.guardian });
   if (!guardian) return res.status(400).send("invalid guardian");
 
-  const MailCheck = await User.findOne({ Email: req.body.Email });
+  const MailCheck = await Student.findOne({ Email: req.body.Email });
   if (MailCheck) return res.status(400).send('user with the given mail already existant');
 
   const student = new Student({
@@ -40,7 +40,7 @@ router.post("/", auth, async (req, res) => {
     Email: req.body.Email,
     Address: req.body.Address,
     Gender: req.body.Gender,
-    guardian: req.body.guardian,
+    guardian: guardian._id,
   });
 
   const user = new User({
@@ -66,10 +66,10 @@ router.put("/:id", auth, async (req, res) => {
   let user = await User.findOne({ Email: student.Email });
   if (!user) user = await new User({ Email: student.Email, Role: 'student', password: student.password }).save();
 
-  const { error } = validateStudent.validate(req.body);
+  const { error } = validateChange.validate(req.body);
   if (error) return res.status(400).send(error.message);
 
-  const guardian = await Guardian.findById(req.body.guardian);
+  const guardian = await Guardian.findOne({ CIN: req.body.guardian });
   if (!guardian) return res.status(400).send("invalid guardian");
 
   const salt = await bcrypt.genSalt(10);
@@ -81,22 +81,18 @@ router.put("/:id", auth, async (req, res) => {
       Name: req.body.Name,
       phone: req.body.phone,
       BirthDate: req.body.BirthDate,
-      Email: req.body.Email,
       Address: req.body.Address,
       Gender: req.body.Gender,
-      guardian: req.body.guardian,
+      guardian: guardian._id,
       password: password
     },
     {
       new: true,
-    }
-  );
+    });
 
   await User.findByIdAndUpdate(user._id, {
-    Email: student.Email,
-    Role: 'student',
     password: student.password
-  })
+  });
 
   res.send(student);
 });

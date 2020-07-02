@@ -63,6 +63,7 @@ router.put('/:pageId/addItem', async (req, res) => {
     if (!formation) return res.status(400).send('invalid formation.');
 
     page.formations.push({
+        _id: formation._id,
         Name: formation.Name,
         Description: formation.Description,
     });

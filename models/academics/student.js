@@ -61,8 +61,17 @@ module.exports.validateStudent = Joi.object({
   Email: Joi.string().min(10).max(100).required(),
   Gender: Joi.string().min(3).max(100).required(),
   Address: Joi.string().min(10).max(255).required(),
-  BirthDate: Joi.string().required(),
-  guardian: Joi.objectId(),
+  BirthDate: Joi.date().min("1970-01-01").max("2015-01-01").required(),
+  guardian: Joi.string().min(8).max(8).required(),
+  password: Joi.string().min(5).max(1024).required()
+});
+module.exports.validateChange = Joi.object({
+  Name: Joi.string().min(10).max(200).required(),
+  phone: Joi.string().min(8).max(20).required(),
+  Gender: Joi.string().min(3).max(100).required(),
+  Address: Joi.string().min(10).max(255).required(),
+  BirthDate: Joi.date().min("1970-01-01").max("2015-01-01").required(),
+  guardian: Joi.string().min(8).max(8).required(),
   password: Joi.string().min(5).max(1024).required()
 });
 // add birthdate min and max to validation
