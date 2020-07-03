@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const { Session, validateSession } = require('../../models/academics/session');
-const { Class } = require('../../models/formations/class');
+const { Class } = require('../../models/academics/class');
 const { Subject } = require('../../models/academics/subject');
 
 router.get('/', async (req, res) => {

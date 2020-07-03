@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-const { Formation, validateFormation } = require('../../models/formations/formation');
+const { Formation, validateFormation } = require('../../models/academics/formation');
 const { Media } = require('../../models/frontCms/media');
 const { Page } = require('../../models/frontCms/page');
 

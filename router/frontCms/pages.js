@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const { Page, validatePage } = require('../../models/frontCms/page');
-const { Formation } = require('../../models/formations/formation');
+const { Formation } = require('../../models/academics/formation');
 
 router.get('/', async (req, res) => {
     res.send(await Page.find());

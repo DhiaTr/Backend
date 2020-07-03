@@ -29,7 +29,7 @@ const clientLogin = require("./router/auth/client");
 
 const admins = require('./router/Human Ressources/admins');
 const teachers = require('./router/Human Ressources/teachers');
-const staffAuth = require('./router/auth/mods');
+const staffAuth = require('./router/auth/admins');
 
 
 app.use("/api/contactInfo", contactInfo);

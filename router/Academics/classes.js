@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-const { Class, validateClass } = require('../../models/formations/class');
+const { Class, validateClass } = require('../../models/academics/class');
 const { Student } = require('../../models/academics/student');
 
 router.get('/', async (req, res) => {
@@ -23,17 +23,12 @@ router.post('/', async (req, res) => {
     const { error } = validateClass.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    let student;
-    for (let i = 0; i < req.body.students.length; i++) {
-        student = await Student.findById(req.body.students[i]);
-        if (!student) return res.status(400).send('invalid student in the list.');
-    }
+    let _class = await Class.findOne({ Name: req.body.Name });
+    if (_class) return res.status(400).send('class already existants.');
 
-    const _class = new Class({
+    _class = new Class({
         Name: req.body.Name,
-        nOfStudents: req.body.students.length,
-        Teacher: req.body.Teacher,
-        students: req.body.students
+        // Teacher: req.body.Teacher,
     });
 
     res.send(await _class.save())
@@ -49,23 +44,68 @@ router.put('/:id', async (req, res) => {
     const { error } = validateClass.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    let student;
-    for (let i = 0; i < req.body.students.length; i++) {
-        student = await Student.findById(req.body.students[i]);
-        if (!student) return res.status(400).send('invalid student in the list.');
-    }
+    _class = await Class.findOne({ Name: req.body.Name });
+    if (_class) return res.status(400).send('class already existants.');
 
     _class = await Class.findByIdAndUpdate(req.params.id, {
         Name: req.body.Name,
-        nOfStudents: req.body.students.length,
-        Teacher: req.body.Teacher,
-        students: req.body.students
+        // Teacher: req.body.Teacher,
     }, {
         new: true
     });
 
     res.send(_class);
+});
 
+router.put('/:classId/addStudent/:studentId', async (req, res) => {
+    let idStatus = mongoose.Types.ObjectId.isValid(req.params.classId);
+    if (!idStatus) return res.status(400).send('invalid class id.');
+    idStatus = mongoose.Types.ObjectId.isValid(req.params.studentId);
+    if (!idStatus) return res.status(400).send('invalid student id.');
+
+    let _class = await Class.findById(req.params.classId);
+    if (!_class) return res.status(404).send('invalid class.');
+    let student = await Student.findById(req.params.studentId);
+    if (!student) return res.status(404).send('invalid Student.');
+
+    student = _class.students.find(s => s == req.params.studentId);
+    if (student) return res.status(404).send('student already registred in class');
+
+    const { error } = validateClass.validate(req.body);
+    if (error) return res.status(400).send(error.message);
+
+    _class.students.push(req.params.studentId);
+
+    _class = await Class.findByIdAndUpdate(req.params.classId, {
+        students: _class.students
+    }, {
+        new: true
+    })
+
+    res.send(_class);
+});
+
+router.put('/:classId/removeStudent/:studentId', async (req, res) => {
+    let idStatus = mongoose.Types.ObjectId.isValid(req.params.classId);
+    if (!idStatus) return res.status(400).send('invalid class id.');
+    idStatus = mongoose.Types.ObjectId.isValid(req.params.studentId);
+    if (!idStatus) return res.status(400).send('invalid student id.');
+
+    let _class = await Class.findById(req.params.classId);
+    if (!_class) return res.status(404).send('invalid class.');
+    let student = await Student.findById(req.params.studentId);
+    if (!student) return res.status(404).send('invalid Student.');
+
+    const { error } = validateClass.validate(req.body);
+    if (error) return res.status(400).send(error.message);
+
+    student = _class.students.find(s => s == req.params.studentId);
+    if (!student) return res.status(404).send('student not registred in requsted class');
+
+    _class.students = _class.students.filter(s => s != req.params.studentId);
+    _class = await Class.findByIdAndUpdate(req.params.classId, _class, { new: true });
+
+    res.send(_class);
 });
 
 router.delete('/:id', async (req, res) => {

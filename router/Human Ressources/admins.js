@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const bcrypt = require('bcrypt');
 
-const { Admin, validateAdmin } = require('../../models/human Ressources/admin');
+const { Admin, validateAdmin } = require('../../models/human Ressources/admins');
 const { Staff } = require('../../models/auth/staff');
 
 router.get('/', async (req, res) => {
