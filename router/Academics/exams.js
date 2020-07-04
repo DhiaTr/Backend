@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
 
     const exam = new Exam({
         Name: req.body.Name,
-        DateTime: req.body.DateTime
+        Description: req.body.Description
     });
 
     res.send(await exam.save());
@@ -42,7 +42,7 @@ router.put('/:id', async (req, res) => {
 
     exam = await Exam.findByIdAndUpdate(req.params.id, {
         Name: req.body.Name,
-        DateTime: req.body.DateTime
+        Description: req.body.Description
     }, {
         new: true
     });

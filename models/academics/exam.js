@@ -9,10 +9,12 @@ const schema = mongoose.Schema({
         maxlength: 30,
         required: true
     },
-    DateTime: {
-        type: Date,
+    Description: {
+        type: String,
+        minlength: 10,
+        maxlength: 255,
         required: true
-    },
+    }
 });
 
 const Exam = mongoose.model('Exam', schema);
@@ -20,5 +22,5 @@ const Exam = mongoose.model('Exam', schema);
 module.exports.Exam = Exam;
 module.exports.validateExam = Joi.object({
     Name: Joi.string().min(2).max(30).required(),
-    DateTime: Joi.date().required(),
+    Description: Joi.string().min(10).max(255).required(),
 });

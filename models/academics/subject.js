@@ -27,5 +27,4 @@ module.exports.Subject = Subject;
 module.exports.validateSubject = Joi.object({
     Name: Joi.string().min(3).max(100).required(),
     Description: Joi.string().min(10).max(255).required(),
-    exams: Joi.array().items(Joi.objectId()).required(),
 });
