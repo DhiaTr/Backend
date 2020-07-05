@@ -15,16 +15,12 @@ const schema = mongoose.Schema({
         maxlength: 1024,
         required: true
     },
-    // image: {
-    //     type: new mongoose.Schema({
-    //         path: {
-    //             type: String,
-    //             minlength: 10,
-    //             maxlength: 1024,
-    //             required: true
-    //         }
-    //     })
-    // },
+    image: {
+        type: String,
+        minlength: 10,
+        maxlength: 1024,
+        required: true
+    },
     durationInMonths: {
         type: Number,
         min: 1,
@@ -52,7 +48,6 @@ module.exports.Formation = Formation;
 module.exports.validateFormation = Joi.object({
     Name: Joi.string().min(5).max(100).required(),
     Description: Joi.string().min(10).max(1024).required(),
-    // image: Joi.objectId(),
     durationInMonths: Joi.number().min(1).max(20).required(),
     Price: Joi.number().min(0).max(100000).required(),
     nOfLectures: Joi.number().min(1).max(1000).required(),

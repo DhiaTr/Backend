@@ -66,6 +66,9 @@ router.put('/:pageId/addItem', async (req, res) => {
         _id: formation._id,
         Name: formation.Name,
         Description: formation.Description,
+        Price: formation.Price,
+        durationInMonths: formation.durationInMonths,
+        image: formation.image
     });
 
     await Page.findByIdAndUpdate(req.params.pageId, {

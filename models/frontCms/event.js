@@ -31,8 +31,13 @@ const schema = mongoose.Schema({
         minlength: 5,
         maxlength: 250,
         required: true
-    }
-    // Add picture
+    },
+    image: {
+        type: String,
+        minlength: 10,
+        maxlength: 1024,
+        required: true
+    },
 });
 
 const Event = mongoose.model('Event', schema);

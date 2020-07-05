@@ -27,7 +27,25 @@ const schema = mongoose.Schema({
             minlength: 10,
             maxlength: 150,
             required: true
-        }
+        },
+        Price: {
+            type: Number,
+            min: 0,
+            max: 100000,
+            required: true
+        },
+        durationInMonths: {
+            type: Number,
+            min: 1,
+            max: 20,
+            required: true
+        },
+        image: {
+            type: String,
+            minlength: 10,
+            maxlength: 1024,
+            required: true
+        },
     }]
 });
 

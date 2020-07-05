@@ -1,6 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const multer = require('multer');
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/formations/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, new Date().toISOString().replace(/:/g, '') + file.originalname);
+    }
+});
+
+const upload = multer({ storage: storage });
 
 const { Formation, validateFormation } = require('../../models/academics/formation');
 const { Page } = require('../../models/frontCms/page');
@@ -19,17 +30,16 @@ router.get('/:id', async (req, res) => {
     res.send(formation);
 });
 
-router.post('/', async (req, res) => {
+router.post('/', upload.single('image'), async (req, res) => {
+    if (!req.file) return res.status(400).send('no image selected.');
+
     const { error } = validateFormation.validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
-
-    // const image = await Media.findById(req.body.image);
-    // if (!image) return res.status(400).send('invalid image.');
 
     const formation = new Formation({
         Name: req.body.Name,
         Description: req.body.Description,
-        // image: { _id: image._id, path: image.path },
+        image: req.file.path,
         durationInMonths: req.body.durationInMonths,
         Price: req.body.Price,
         nOfLectures: req.body.nOfLectures
@@ -37,8 +47,9 @@ router.post('/', async (req, res) => {
     res.send(await formation.save());
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', upload.single('image'), async (req, res) => {
 
+    if (!req.file) return res.status(400).send('no image selected.');
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send('invalid id.');
 
@@ -46,16 +57,12 @@ router.put('/:id', async (req, res) => {
     if (!formation) return res.status(404).send('formation not found.');
 
     const { error } = validateFormation.validate(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
-
-    // const image = await Media.findById(req.body.image);
-    // if (!image) return res.status(400).send('invalid image.');
-
+    if (error) return res.status(400).send(error.message);
 
     formation = await Formation.findByIdAndUpdate(req.params.id, {
         Name: req.body.Name,
         Description: req.body.Description,
-        // image: { _id: image._id, path: image.path },
+        image: req.file.path,
         durationInMonths: req.body.durationInMonths,
         Price: req.body.Price,
         nOfLectures: req.body.nOfLectures

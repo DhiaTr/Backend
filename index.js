@@ -2,8 +2,8 @@ const express = require("express");
 const app = express();
 
 
-app.use("/uploads", express.static("uploads"));
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 require("./startup/db")();
 require("./startup/config")();

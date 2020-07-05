@@ -1,7 +1,17 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/events/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, new Date().toISOString().replace(/:/g, '') + file.originalname);
+    }
+});
 
+const upload = multer({ storage: storage });
 const { Event, validateEvent } = require('../../models/frontCms/event');
 
 router.get('/', async (req, res) => {
@@ -18,7 +28,9 @@ router.get('/:id', async (req, res) => {
     res.send(event);
 });
 
-router.post('/', async (req, res) => {
+router.post('/', upload.single('image'), async (req, res) => {
+    if (!req.file) return res.status(400).send('no image selected.');
+
     const { error } = validateEvent.validate(req.body);
     if (error) res.status(400).send(error.message);
 
@@ -27,12 +39,15 @@ router.post('/', async (req, res) => {
         Description: req.body.Description,
         startDate: req.body.startDate,
         Duration: req.body.Duration,
-        location: req.body.location
+        location: req.body.location,
+        image: req.file.path
     });
     res.send(await event.save());
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', upload.single('image'), async (req, res) => {
+    if (!req.file) return res.status(400).send('no image selected.');
+
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send('invalid id.');
 
@@ -47,7 +62,8 @@ router.put('/:id', async (req, res) => {
         Description: req.body.Description,
         startDate: req.body.startDate,
         Duration: req.body.Duration,
-        location: req.body.location
+        location: req.body.location,
+        image: req.file.path
     }, {
         new: true
     });
