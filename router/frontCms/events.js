@@ -18,6 +18,11 @@ router.get('/', async (req, res) => {
     res.send(await Event.find());
 });
 
+router.get('/lastThree', async (req, res) => {
+    res.send(await Event.find().sort([['_id', -1]]).limit(3));
+    // get last added 3
+});
+
 router.get('/:id', async (req, res) => {
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send('invalid id.');
@@ -34,10 +39,16 @@ router.post('/', upload.single('image'), async (req, res) => {
     const { error } = validateEvent.validate(req.body);
     if (error) res.status(400).send(error.message);
 
+    let startDate = new Date(req.body.startDate);
+    let duration = parseInt(req.body.Duration);
+    let endDate = startDate.setHours(duration + startDate.getHours());
+    endDate = new Date(endDate).toISOString();
+
     const event = new Event({
         Name: req.body.Name,
         Description: req.body.Description,
         startDate: req.body.startDate,
+        endDate: endDate,
         Duration: req.body.Duration,
         location: req.body.location,
         image: req.file.path
@@ -57,10 +68,16 @@ router.put('/:id', upload.single('image'), async (req, res) => {
     const { error } = validateEvent.validate(req.body);
     if (error) res.status(400).send(error.message);
 
+    let startDate = new Date(req.body.startDate);
+    let duration = parseInt(req.body.Duration);
+    let endDate = startDate.setHours(duration + startDate.getHours());
+    endDate = new Date(endDate).toISOString();
+
     event = await Event.findByIdAndUpdate(req.params.id, {
         Name: req.body.Name,
         Description: req.body.Description,
         startDate: req.body.startDate,
+        endDate: endDate,
         Duration: req.body.Duration,
         location: req.body.location,
         image: req.file.path

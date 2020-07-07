@@ -16,7 +16,7 @@ const schema = mongoose.Schema({
     },
     address: {
         type: String,
-        minlength: 30,
+        minlength: 15,
         maxlength: 255,
         required: true
     },
@@ -28,25 +28,25 @@ const schema = mongoose.Schema({
     },
     FacebookID: {
         type: String,
-        minlength: 20,
+        minlength: 5,
         maxlength: 255,
         required: true
     },
     TwitterID: {
         type: String,
-        minlength: 20,
+        minlength: 5,
         maxlength: 255,
         required: true
     },
     InstagramID: {
         type: String,
-        minlength: 20,
+        minlength: 5,
         maxlength: 255,
         required: true
     },
     LinkedinID: {
         type: String,
-        minlength: 20,
+        minlength: 5,
         maxlength: 255,
         required: true
     }
@@ -58,12 +58,12 @@ function validateContactInfo() {
     return Joi.object({
         phone1: Joi.string().min(8).max(20).required(),
         phone2: Joi.string().min(8).max(20).required(),
-        address: Joi.string().min(30).max(255).required(),
+        address: Joi.string().min(15).max(255).required(),
         email: Joi.string().min(10).max(255).required(),
-        FacebookID: Joi.string().min(20).max(1024).required(),
-        TwitterID: Joi.string().min(20).max(1024).required(),
-        InstagramID: Joi.string().min(20).max(1024).required(),
-        LinkedinID: Joi.string().min(20).max(1024).required()
+        FacebookID: Joi.string().min(5).max(1024).required(),
+        TwitterID: Joi.string().min(5).max(1024).required(),
+        InstagramID: Joi.string().min(5).max(1024).required(),
+        LinkedinID: Joi.string().min(5).max(1024).required()
     });
 }
 

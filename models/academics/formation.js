@@ -24,7 +24,7 @@ const schema = mongoose.Schema({
     durationInMonths: {
         type: Number,
         min: 1,
-        max: 20,
+        max: 300,
         required: true
     },
     Price: {
@@ -48,7 +48,7 @@ module.exports.Formation = Formation;
 module.exports.validateFormation = Joi.object({
     Name: Joi.string().min(5).max(100).required(),
     Description: Joi.string().min(10).max(1024).required(),
-    durationInMonths: Joi.number().min(1).max(20).required(),
+    durationInMonths: Joi.number().min(1).max(300).required(),
     Price: Joi.number().min(0).max(100000).required(),
     nOfLectures: Joi.number().min(1).max(1000).required(),
 });

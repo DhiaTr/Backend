@@ -14,7 +14,7 @@ router.get('/:id', async (req, res) => {
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send('invalid id.');
 
-    let menu = await Menu.findById(req.params.id).populate('[items].Page');
+    let menu = await Menu.findById(req.params.id).populate('items.Page');
     if (!menu) return res.status(400).send('invalid menu.');
 
     res.send(menu);

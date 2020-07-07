@@ -20,6 +20,12 @@ const schema = mongoose.Schema({
         max: '01-01-3020',
         required: true
     },
+    endDate: {
+        type: Date,
+        min: '01-01-2020',
+        max: '01-01-3020',
+        required: true
+    },
     Duration: {
         type: Number,
         min: 1,

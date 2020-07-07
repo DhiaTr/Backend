@@ -49,7 +49,6 @@ router.post('/', upload.single('image'), async (req, res) => {
 
 router.put('/:id', upload.single('image'), async (req, res) => {
 
-    if (!req.file) return res.status(400).send('no image selected.');
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send('invalid id.');
 
@@ -59,14 +58,17 @@ router.put('/:id', upload.single('image'), async (req, res) => {
     const { error } = validateFormation.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    formation = await Formation.findByIdAndUpdate(req.params.id, {
+    formation = {
         Name: req.body.Name,
         Description: req.body.Description,
-        image: req.file.path,
         durationInMonths: req.body.durationInMonths,
         Price: req.body.Price,
         nOfLectures: req.body.nOfLectures
-    }, {
+    }
+
+    if (req.file) formation.image = req.file.path;
+
+    formation = await Formation.findByIdAndUpdate(req.params.id, formation, {
         new: true
     });
 
@@ -74,8 +76,15 @@ router.put('/:id', upload.single('image'), async (req, res) => {
     pages.forEach(async (page) => {
         let formations = page.formations.map(f => {
             if (f._id == req.params.id) {
-                return { _id: f._id, Name: req.body.Name, Description: req.body.Description };
-            }
+                return {
+                    _id: f._id,
+                    Name: formation.Name,
+                    Description: formation.Description,
+                    Price: formation.Price,
+                    durationInMonths: formation.durationInMonths,
+                    image: formation.image
+                };
+            } else return f;
         });
         newPage = {
             _id: page._id,
@@ -86,7 +95,6 @@ router.put('/:id', upload.single('image'), async (req, res) => {
 
         await Page.findByIdAndUpdate(page._id, newPage);
     });
-
 
     res.send(formation);
 });
