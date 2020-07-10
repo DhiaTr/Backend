@@ -17,7 +17,7 @@ const schema = mongoose.Schema({
     // },
     formation: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Formtaion",
+        ref: "Formation",
     },
     students: [{
         type: mongoose.Schema.Types.ObjectId,

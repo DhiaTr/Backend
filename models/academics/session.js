@@ -9,16 +9,26 @@ const schema = mongoose.Schema({
     },
     subject: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Student",
+        ref: "Subject",
     },
-    startDateTime: {
-        type: Date,
+    weekDay: {
+        type: String,
+        minlength: 5,
+        maxlength: 8,
         required: true
     },
-    endDateTime: {
-        type: Date,
+    startHour: {
+        type: Number,
+        min: 1,
+        max: 24,
         required: true
     },
+    duration: {
+        type: Number,
+        min: 1,
+        max: 12,
+        required: true
+    }
 });
 
 const Session = mongoose.model('Session', schema);
@@ -27,6 +37,7 @@ module.exports.Session = Session;
 module.exports.validateSession = Joi.object({
     class: Joi.objectId(),
     subject: Joi.objectId(),
-    startDateTime: Joi.date().required(),
-    endDateTime: Joi.date().required(),
+    weekDay: Joi.string().min(5).max(8).required(),
+    startHour: Joi.number().min(10).max(24).required(),
+    duration: Joi.number().min(1).max(12).required(),
 });

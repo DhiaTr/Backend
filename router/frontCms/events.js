@@ -57,8 +57,6 @@ router.post('/', upload.single('image'), async (req, res) => {
 });
 
 router.put('/:id', upload.single('image'), async (req, res) => {
-    if (!req.file) return res.status(400).send('no image selected.');
-
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send('invalid id.');
 
@@ -73,15 +71,18 @@ router.put('/:id', upload.single('image'), async (req, res) => {
     let endDate = startDate.setHours(duration + startDate.getHours());
     endDate = new Date(endDate).toISOString();
 
-    event = await Event.findByIdAndUpdate(req.params.id, {
+    event = {
         Name: req.body.Name,
         Description: req.body.Description,
         startDate: req.body.startDate,
         endDate: endDate,
         Duration: req.body.Duration,
         location: req.body.location,
-        image: req.file.path
-    }, {
+    }
+
+    if (req.file) event.image = req.file.path;
+
+    event = await Event.findByIdAndUpdate(req.params.id, event, {
         new: true
     });
     res.send(event);

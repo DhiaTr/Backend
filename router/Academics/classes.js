@@ -7,7 +7,7 @@ const { Student } = require('../../models/academics/student');
 const { Formation } = require('../../models/academics/formation');
 
 router.get('/', async (req, res) => {
-    res.send(await Class.find());
+    res.send(await Class.find().populate('formation'));
 });
 
 router.get('/:id', async (req, res) => {
@@ -53,7 +53,7 @@ router.post('/', async (req, res) => {
     if (error) return res.status(400).send(error.message);
 
     let _class = await Class.findOne({ Name: req.body.Name });
-    if (_class) return res.status(400).send('class already existants.');
+    if (_class) return res.status(400).send('class already existant.');
 
     const formation = await Formation.findById(req.body.formation);
     if (!formation) return res.status(400).send('invalid formation.');
@@ -78,7 +78,7 @@ router.put('/:id', async (req, res) => {
     if (error) return res.status(400).send(error.message);
 
     _class = await Class.findOne({ Name: req.body.Name });
-    if (_class) return res.status(400).send('class already existants.');
+    if (_class) return res.status(400).send('class already existant.');
 
     const formation = await Formation.findById(req.body.formation);
     if (!formation) return res.status(400).send('invalid formation.');
