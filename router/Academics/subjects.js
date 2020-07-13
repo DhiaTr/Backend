@@ -40,7 +40,10 @@ router.post('/', async (req, res) => {
     const { error } = validateSubject.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    const subject = new Subject({
+    let subject = await Subject.findOne({ Name: req.body.Name });
+    if (subject) return res.status(400).send('subject with the same Name Already exists');
+
+    subject = new Subject({
         Name: req.body.Name,
         Description: req.body.Description,
     });
@@ -54,6 +57,9 @@ router.put('/:id', async (req, res) => {
 
     let subject = await Subject.findById(req.params.id);
     if (!subject) return res.status(404).send('invalid subject.');
+
+    let subject = await Subject.findOne({ Name: req.body.Name });
+    if (subject) return res.status(400).send('subject with the same Name Already exists');
 
     const { error } = validateSubject.validate(req.body);
     if (error) return res.status(400).send(error.message);

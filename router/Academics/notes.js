@@ -7,7 +7,7 @@ const { Exam } = require('../../models/academics/exam');
 const { Student } = require('../../models/academics/student');
 
 router.get('/', async (req, res) => {
-    res.send(await Note.find());
+    res.send(await Note.find().populate('exam', 'Name').populate('student', 'Name'));
 });
 
 router.get('/:id', async (req, res) => {
@@ -17,7 +17,7 @@ router.get('/:id', async (req, res) => {
     const note = await Note.findById(req.params.id);
     if (!note) return res.status(404).send('invalid note.');
 
-    res.send(await Note.findById(req.params.id));
+    res.send(await Note.findById(req.params.id).populate('exam', 'Name').populate('student', 'Name'));
 });
 
 router.post('/', async (req, res) => {
@@ -28,12 +28,13 @@ router.post('/', async (req, res) => {
     const exam = await Exam.findById(req.body.exam);
     if (!exam) return res.status(400).send('invalid exam.');
 
-    const student = await Student.findById(req.body.student);
+    const student = await Student.findOne({ Email: req.body.student });
     if (!student) return res.status(400).send('invalid student.');
 
     const note = new Note({
         exam: req.body.exam,
-        student: req.body.student,
+        student: student._id,
+        date: req.body.date,
         value: req.body.value
     });
 
@@ -53,12 +54,13 @@ router.put('/:id', async (req, res) => {
     const exam = await Exam.findById(req.body.exam);
     if (!exam) return res.status(400).send('invalid exam.');
 
-    const student = await Student.findById(req.body.student);
+    const student = await Student.findOne({ Email: req.body.student });
     if (!student) return res.status(400).send('invalid student.');
 
     note = await Note.findByIdAndUpdate(req.params.id, {
         exam: req.body.exam,
-        student: req.body.student,
+        student: student._id,
+        date: req.body.date,
         value: req.body.value
     }, {
         new: true
