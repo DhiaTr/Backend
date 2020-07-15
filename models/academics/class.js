@@ -9,12 +9,6 @@ const schema = mongoose.Schema({
         maxlength: 100,
         required: true
     },
-    // Teacher: {
-    //     type: String,
-    //     minlength: 3,
-    //     maxlength: 100,
-    //     required: true
-    // },
     formation: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Formation",
@@ -31,7 +25,6 @@ module.exports.Class = Class;
 module.exports.validateClass = Joi.object({
     Name: Joi.string().min(1).max(100).required(),
     formation: Joi.objectId(),
-    // Teacher: Joi.string().min(3).max(100).required(),
 });
 module.exports.validateStudent = Joi.object({
     student: Joi.objectId(),

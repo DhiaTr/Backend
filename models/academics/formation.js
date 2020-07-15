@@ -38,7 +38,11 @@ const schema = mongoose.Schema({
         min: 1,
         max: 1000,
         required: true
-    }
+    },
+    subjects: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subject",
+    }],
 });
 
 const Formation = mongoose.model('Formation', schema);
@@ -52,3 +56,7 @@ module.exports.validateFormation = Joi.object({
     Price: Joi.number().min(0).max(100000).required(),
     nOfLectures: Joi.number().min(1).max(1000).required(),
 });
+
+module.exports.validateSubject = Joi.object({
+    subject: Joi.objectId(),
+})

@@ -21,6 +21,14 @@ const schema = mongoose.Schema({
         maxlength: 50,
         required: true
     },
+    class: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Class",
+    },
+    subject: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subject",
+    },
 });
 
 const Exam = mongoose.model('Exam', schema);
@@ -30,4 +38,6 @@ module.exports.validateExam = Joi.object({
     Name: Joi.string().min(2).max(30).required(),
     Type: Joi.string().min(2).max(30).required(),
     Description: Joi.string().min(2).max(50).required(),
+    class: Joi.objectId(),
+    subject: Joi.objectId()
 });

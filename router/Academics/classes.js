@@ -20,6 +20,10 @@ router.get('/:id', async (req, res) => {
     res.send(await Class.findById(_class).populate('students'));
 });
 
+router.get('/formation/:formationId', async (req, res) => {
+    res.send(await Class.find({ formation: req.params.formationId }));
+});
+
 router.get('/:id/students/', async (req, res) => {
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send('invalid id.');

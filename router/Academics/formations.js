@@ -13,12 +13,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-const { Formation, validateFormation } = require('../../models/academics/formation');
+const { Formation, validateFormation, validateSubject } = require('../../models/academics/formation');
 const { Page } = require('../../models/frontCms/page');
+const { Subject } = require('../../models/academics/subject');
+
 
 router.get('/', async (req, res) => {
     res.send(await Formation.find());
 });
+
 
 router.get('/:id', async (req, res) => {
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
@@ -42,7 +45,8 @@ router.post('/', upload.single('image'), async (req, res) => {
         image: req.file.path,
         durationInMonths: req.body.durationInMonths,
         Price: req.body.Price,
-        nOfLectures: req.body.nOfLectures
+        nOfLectures: req.body.nOfLectures,
+        subjects: []
     });
     res.send(await formation.save());
 });
@@ -99,6 +103,54 @@ router.put('/:id', upload.single('image'), async (req, res) => {
     res.send(formation);
 });
 
+router.put('/:id/addSubject', async (req, res) => {
+    const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
+    if (!idStatus) return res.status(400).send('invalid id.');
+
+    let formation = await Formation.findById(req.params.id);
+    if (!formation) return res.status(404).send('formation not found.');
+
+    const { error } = validateSubject.validate(req.body);
+    if (error) return res.status(400).send(error.message);
+
+    let subject = await Subject.findById(req.body.subject);
+    if (!subject) return res.status(400).send('invalid subject');
+
+    subject = formation.subjects.find(s => s == req.body.subject);
+    if (subject) return res.status(400).send('subject already in class');
+
+    formation.subjects.push(req.body.subject);
+    formation = await Formation.findByIdAndUpdate(req.params.id, {
+        subjects: formation.subjects
+    }, { new: true });
+
+    res.send(formation);
+});
+
+router.put('/:id/deleteSubject', async (req, res) => {
+    const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
+    if (!idStatus) return res.status(400).send('invalid id.');
+
+    let formation = await Formation.findById(req.params.id);
+    if (!formation) return res.status(404).send('formation not found.');
+
+    const { error } = validateSubject.validate(req.body);
+    if (error) return res.status(400).send(error.message);
+
+    let subject = await Subject.findById(req.body.subject);
+    if (!subject) return res.status(400).send('invalid subject');
+
+    subject = formation.subjects.find(s => s == req.body.subject);
+    if (!subject) return res.status(400).send('subject not existant in class');
+
+    formation.subjects = formation.subjects.filter(subject => subject != req.body.subject);
+    formation = await Formation.findByIdAndUpdate(req.params.id, {
+        subjects: formation.subjects
+    }, { new: true });
+
+    res.send(formation);
+});
+
 router.delete('/:id', async (req, res) => {
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send('invalid id.');
@@ -119,6 +171,7 @@ router.delete('/:id', async (req, res) => {
     await Formation.findByIdAndDelete(req.params.id);
     res.send(formation);
 });
+
 
 
 
