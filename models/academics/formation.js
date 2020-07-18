@@ -40,8 +40,18 @@ const schema = mongoose.Schema({
         required: true
     },
     subjects: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Subject",
+        Name: {
+            type: String,
+            minlength: 2,
+            maxlength: 100,
+            required: true
+        },
+        Description: {
+            type: String,
+            minlength: 5,
+            maxlength: 1024,
+            required: true
+        }
     }],
 });
 
@@ -58,5 +68,6 @@ module.exports.validateFormation = Joi.object({
 });
 
 module.exports.validateSubject = Joi.object({
-    subject: Joi.objectId(),
+    Name: Joi.string().min(2).max(100).required(),
+    Description: Joi.string().min(5).max(1024).required(),
 })

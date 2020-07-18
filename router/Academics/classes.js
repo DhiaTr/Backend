@@ -81,8 +81,8 @@ router.put('/:id', async (req, res) => {
     const { error } = validateClass.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    _class = await Class.findOne({ Name: req.body.Name });
-    if (_class) return res.status(400).send('class already existant.');
+    // _class = await Class.findOne({ Name: req.body.Name });
+    // if (_class) return res.status(400).send('class already existant.');
 
     const formation = await Formation.findById(req.body.formation);
     if (!formation) return res.status(400).send('invalid formation.');

@@ -58,8 +58,6 @@ router.put('/:id', async (req, res) => {
     let subject = await Subject.findById(req.params.id);
     if (!subject) return res.status(404).send('invalid subject.');
 
-    subject = await Subject.findOne({ Name: req.body.Name });
-    if (subject) return res.status(400).send('subject with the same Name Already exists');
 
     const { error } = validateSubject.validate(req.body);
     if (error) return res.status(400).send(error.message);

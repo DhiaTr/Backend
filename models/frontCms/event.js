@@ -10,7 +10,7 @@ const schema = mongoose.Schema({
     },
     Description: {
         type: String,
-        minlength: 10,
+        minlength: 5,
         maxlength: 1024,
         required: true
     },
@@ -50,7 +50,7 @@ const Event = mongoose.model('Event', schema);
 module.exports.Event = Event;
 module.exports.validateEvent = Joi.object({
     Name: Joi.string().min(5).max(250).required(),
-    Description: Joi.string().min(10).max(1024).required(),
+    Description: Joi.string().min(5).max(1024).required(),
     startDate: Joi.date().min('01-01-2020').max('01-01-3020').required(),
     Duration: Joi.number().min(1).max(300).required(),
     location: Joi.string().min(5).max(250).required()

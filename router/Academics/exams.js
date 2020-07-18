@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 
 const { Exam, validateExam } = require('../../models/academics/exam');
-const {  } = require('../../models/academics/student');
+const { } = require('../../models/academics/student');
 
 router.get('/', async (req, res) => {
     res.send(await Exam.find());
