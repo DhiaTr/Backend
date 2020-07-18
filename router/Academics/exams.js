@@ -2,66 +2,88 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-const { Exam, validateExam } = require('../../models/academics/exam');
-const { } = require('../../models/academics/student');
+const { Class, validateExam } = require('../../models/academics/class');
 
-router.get('/', async (req, res) => {
-    res.send(await Exam.find());
+router.get('/:classId', async (req, res) => {
+    const idStatus = mongoose.Types.ObjectId.isValid(req.params.classId);
+    if (!idStatus) return res.status(400).send('invalid class id.');
+
+    const _class = await Class.findById(req.params.classId);
+    if (!_class) return res.status(404).send('class not found.');
+
+    res.send(await _class.exams);
 });
 
-router.get('/:id', async (req, res) => {
-    const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
-    if (!idStatus) return res.status(400).send('invalid id.');
+router.get('/:classId/exam/:examId', async (req, res) => {
+    let idStatus = mongoose.Types.ObjectId.isValid(req.params.classId);
+    if (!idStatus) return res.status(400).send('invalid class id.');
+    idStatus = mongoose.Types.ObjectId.isValid(req.params.examId);
+    if (!idStatus) return res.status(400).send('invalid exam id');
 
-    const exam = await Exam.findById(req.params.id);
-    if (!exam) return res.status(404).send('invalid exam.');
+    const _class = await Class.findById(req.params.classId);
+    if (!_class) return res.status(404).send('class not found.');
+    const exam = _class.exams.find(e => e._id == req.params.examId);
+    if (!exam) return res.status(404).send('exam not found.');
 
     res.send(exam);
 });
 
-router.post('/', async (req, res) => {
+router.post('/:classId', async (req, res) => {
+
+    const idStatus = mongoose.Types.ObjectId.isValid(req.params.classId);
+    if (!idStatus) return res.status(400).send('invalid class id.');
+
+    const _class = await Class.findById(req.params.classId);
+    if (!_class) return res.status(404).send('class not found.');
     const { error } = validateExam.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    const exam = new Exam({
-        Name: req.body.Name,
-        Type: req.body.Type,
-        Description: req.body.Description,
-    });
+    _class.exams.push(req.body);
+    await Class.findByIdAndUpdate(req.params.classId, _class);
 
-    res.send(await exam.save());
+    res.send(_class);
 });
 
-router.put('/:id', async (req, res) => {
-    const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
-    if (!idStatus) return res.status(400).send('invalid id.');
+router.put('/:classId/exam/:examId', async (req, res) => {
+    let idStatus = mongoose.Types.ObjectId.isValid(req.params.classId);
+    if (!idStatus) return res.status(400).send('invalid class id.');
+    idStatus = mongoose.Types.ObjectId.isValid(req.params.examId);
+    if (!idStatus) return res.status(400).send('invalid exam id');
 
-    let exam = await Exam.findById(req.params.id);
-    if (!exam) return res.status(404).send('invalid exam.');
+    let _class = await Class.findById(req.params.classId);
+    if (!_class) return res.status(404).send('class not found.');
+    const exam = _class.exams.find(e => e._id == req.params.examId);
+    if (!exam) return res.status(404).send('exam not found.');
 
     const { error } = validateExam.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    exam = await Exam.findByIdAndUpdate(req.params.id, {
-        Name: req.body.Name,
-        Type: req.body.Type,
-        Description: req.body.Description,
-    }, {
-        new: true
+    _class.exams = _class.exams.map(e => {
+        if (e._id == req.params.examId) {
+            req.body._id = e._id;
+            return req.body;
+        } else
+            return e;
     });
+    await Class.findByIdAndUpdate(req.params.classId, _class);
 
-    res.send(await exam);
+    res.send(_class);
 });
 
-router.delete('/:id', async (req, res) => {
-    const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
-    if (!idStatus) return res.status(400).send('invalid id.');
+router.delete('/:classId/exam/:examId', async (req, res) => {
+    let idStatus = mongoose.Types.ObjectId.isValid(req.params.classId);
+    if (!idStatus) return res.status(400).send('invalid class id.');
+    idStatus = mongoose.Types.ObjectId.isValid(req.params.examId);
+    if (!idStatus) return res.status(400).send('invalid exam id');
 
-    let exam = await Exam.findById(req.params.id);
-    if (!exam) return res.status(404).send('invalid exam.');
+    let _class = await Class.findById(req.params.classId);
+    if (!_class) return res.status(404).send('class not found.');
+    const exam = _class.exams.find(e => e._id == req.params.examId);
+    if (!exam) return res.status(404).send('exam not found.');
 
-    await Exam.findByIdAndDelete(req.params.id);
-    res.send(exam);
+    _class.exams = _class.exams.filter(e => e._id != req.params.examId);
+    await Class.findByIdAndUpdate(req.params.classId, _class);
+    res.send(_class);
 });
 
 
