@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Joi = require("@hapi/joi");
+const { number } = require("@hapi/joi");
 Joi.objectId = require("joi-objectid")(Joi);
 
 const schema = mongoose.Schema({
@@ -48,8 +49,16 @@ const schema = mongoose.Schema({
     minlength: 5,
     maxlength: 1024,
     required: true,
-  }
-
+  },
+  notes: [{
+    exam: mongoose.Schema.Types.ObjectId,
+    value: {
+      type: Number,
+      minlength: 0,
+      maxlength: 20,
+      required: true,
+    },
+  }]
 });
 
 const Student = mongoose.model("Student", schema);
@@ -73,5 +82,10 @@ module.exports.validateChange = Joi.object({
   BirthDate: Joi.date().min("1970-01-01").max("2015-01-01").required(),
   guardian: Joi.string().min(8).max(8).required(),
   password: Joi.string().min(5).max(1024).required()
+});
+
+module.exports.validateNote = Joi.object({
+  exam: Joi.objectId(),
+  value: Joi.number().min(0).max(20).required()
 });
 // add birthdate min and max to validation

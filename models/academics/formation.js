@@ -40,18 +40,20 @@ const schema = mongoose.Schema({
         required: true
     },
     subjects: [{
-        Name: {
-            type: String,
-            minlength: 2,
-            maxlength: 100,
-            required: true
-        },
-        Description: {
-            type: String,
-            minlength: 5,
-            maxlength: 1024,
-            required: true
-        }
+        type: new mongoose.Schema({
+            Name: {
+                type: String,
+                minlength: 2,
+                maxlength: 100,
+                required: true
+            },
+            Description: {
+                type: String,
+                minlength: 5,
+                maxlength: 1024,
+                required: true
+            }
+        }),
     }],
 });
 

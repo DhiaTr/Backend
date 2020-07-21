@@ -2,82 +2,103 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-const { Note, validateNote } = require('../../models/academics/note');
-const { Exam } = require('../../models/academics/exam');
-const { Student } = require('../../models/academics/student');
+const { Note } = require('../../models/academics/note');
+const { Class } = require('../../models/academics/class');
+const { Student, validateNote } = require('../../models/academics/student');
 
-router.get('/', async (req, res) => {
-    res.send(await Note.find().populate('exam', 'Name').populate('student', 'Name'));
+router.get('/:studentId', async (req, res) => {
+    const students = await (await Student.findById(req.params.studentId));
+    res.send(students.notes);
 });
 
-router.get('/:id', async (req, res) => {
-    const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
-    if (!idStatus) return res.status(400).send('invalid id.');
+router.get('/:studentId/note/:noteId', async (req, res) => {
+    let idStatus = mongoose.Types.ObjectId.isValid(req.params.studentId);
+    if (!idStatus) return res.status(400).send('invalid student id.');
+    idStatus = mongoose.Types.ObjectId.isValid(req.params.noteId);
+    if (!idStatus) return res.status(400).send('invalid note id.');
 
-    const note = await Note.findById(req.params.id);
-    if (!note) return res.status(404).send('invalid note.');
-
-    res.send(await Note.findById(req.params.id).populate('exam', 'Name').populate('student', 'Name'));
-});
-
-router.post('/', async (req, res) => {
-
-    const { error } = validateNote.validate(req.body);
-    if (error) return res.status(400).send(error.message);
-
-    const exam = await Exam.findById(req.body.exam);
-    if (!exam) return res.status(400).send('invalid exam.');
-
-    const student = await Student.findOne({ Email: req.body.student });
-    if (!student) return res.status(400).send('invalid student.');
-
-    const note = new Note({
-        exam: req.body.exam,
-        student: student._id,
-        date: req.body.date,
-        value: req.body.value
-    });
-
-    res.send(await note.save());
-});
-
-router.put('/:id', async (req, res) => {
-    const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
-    if (!idStatus) return res.status(400).send('invalid id.');
-
-    let note = await Note.findById(req.params.id);
-    if (!note) return res.status(404).send('invalid note.');
-
-    const { error } = validateNote.validate(req.body);
-    if (error) return res.status(400).send(error.message);
-
-    const exam = await Exam.findById(req.body.exam);
-    if (!exam) return res.status(400).send('invalid exam.');
-
-    const student = await Student.findOne({ Email: req.body.student });
-    if (!student) return res.status(400).send('invalid student.');
-
-    note = await Note.findByIdAndUpdate(req.params.id, {
-        exam: req.body.exam,
-        student: student._id,
-        date: req.body.date,
-        value: req.body.value
-    }, {
-        new: true
-    });
+    const student = await Student.findById(req.params.studentId);
+    if (!student) return res.status(404).send('student not found.');
+    const note = student.notes.find(s => s._id == req.params.noteId);
+    if (!note) return res.status(404).send('note not found!');
 
     res.send(note);
 });
 
-router.delete('/:id', async (req, res) => {
-    const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
-    if (!idStatus) return res.status(400).send('invalid id.');
+router.post('/:studentId', async (req, res) => {
 
-    const note = await Note.findById(req.params.id);
-    if (!note) return res.status(404).send('invalid note.');
+    let idStatus = mongoose.Types.ObjectId.isValid(req.params.studentId);
+    if (!idStatus) return res.status(400).send('invalid student id.');
 
-    await Note.findByIdAndDelete(req.params.id);
-    res.send(note);
+    const student = await Student.findById(req.params.studentId);
+    if (!student) return res.status(400).send('invalid student.');
+
+    const { error } = validateNote.validate(req.body);
+    if (error) return res.status(400).send(error.message);
+
+    let exam = await Class.findOne({ 'exams._id': req.body.exam });
+    if (!exam) return res.status(400).send('exam not found.');
+
+    exam = student.notes.find(e => e.exam == req.body.exam);
+    if (exam) return res.status(400).send('exam already noted');
+
+    student.notes.push(req.body);
+    await Student.findByIdAndUpdate(req.params.studentId, {
+        notes: student.notes
+    });
+
+    res.send(student);
+});
+
+router.put('/:studentId/note/:noteId', async (req, res) => {
+    let idStatus = mongoose.Types.ObjectId.isValid(req.params.studentId);
+    if (!idStatus) return res.status(400).send('invalid student id.');
+    idStatus = mongoose.Types.ObjectId.isValid(req.params.noteId);
+    if (!idStatus) return res.status(400).send('invalid note id.');
+
+    const student = await Student.findById(req.params.studentId);
+    if (!student) return res.status(404).send('student not found.');
+    const note = student.notes.find(s => s._id == req.params.noteId);
+    if (!note) return res.status(404).send('note not found!');
+
+    const { error } = validateNote.validate(req.body);
+    if (error) return res.status(400).send(error.message);
+
+    let exam = await Class.findOne({ 'exams._id': req.body.exam });
+    if (!exam) return res.status(400).send('exam not found.');
+
+    student.notes = student.notes.map(n => {
+        if (n._id == req.params.noteId) {
+            return {
+                _id: n._id,
+                exam: req.body.exam,
+                value: req.body.value
+            }
+        }
+        return n;
+    });
+    await Student.findByIdAndUpdate(req.params.studentId, {
+        notes: student.notes
+    });
+    res.send(student);
+});
+
+router.delete('/:studentId/note/:noteId', async (req, res) => {
+    let idStatus = mongoose.Types.ObjectId.isValid(req.params.studentId);
+    if (!idStatus) return res.status(400).send('invalid student id.');
+    idStatus = mongoose.Types.ObjectId.isValid(req.params.noteId);
+    if (!idStatus) return res.status(400).send('invalid note id.');
+
+    const student = await Student.findById(req.params.studentId);
+    if (!student) return res.status(404).send('student not found.');
+    const note = student.notes.find(s => s._id == req.params.noteId);
+    if (!note) return res.status(404).send('note not found!');
+
+    student.notes = student.notes.filter(n => n._id != req.params.noteId);
+    await Student.findByIdAndUpdate(req.params.studentId, {
+        notes: student.notes
+    });
+    res.send(student);
 });
 
 
