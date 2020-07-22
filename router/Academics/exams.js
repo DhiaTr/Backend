@@ -29,7 +29,6 @@ router.get('/:classId/exam/:examId', async (req, res) => {
 });
 
 router.post('/:classId', async (req, res) => {
-
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.classId);
     if (!idStatus) return res.status(400).send('invalid class id.');
 

@@ -30,10 +30,10 @@ const schema = mongoose.Schema({
             maxlength: 100,
             required: true
         },
-        Description: {
+        TeacherComment: {
             type: String,
             minlength: 5,
-            maxlength: 255,
+            maxlength: 100,
             required: true
         },
 
@@ -53,6 +53,6 @@ module.exports.validateStudent = Joi.object({
 module.exports.validateExam = Joi.object({
     Name: Joi.string().min(2).max(100).required(),
     Type: Joi.string().min(2).max(100).required(),
-    Description: Joi.string().min(5).max(255).required(),
+    TeacherComment: Joi.string().min(5).max(100).required(),
 
 })

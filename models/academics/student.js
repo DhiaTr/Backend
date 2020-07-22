@@ -51,7 +51,15 @@ const schema = mongoose.Schema({
     required: true,
   },
   notes: [{
-    exam: mongoose.Schema.Types.ObjectId,
+    exam: {
+      _id: mongoose.Schema.Types.ObjectId,
+      Name: {
+        type: String,
+        minlength: 2,
+        maxlength: 100,
+        required: true
+      }
+    },
     value: {
       type: Number,
       minlength: 0,
