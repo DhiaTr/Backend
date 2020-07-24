@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Joi = require("@hapi/joi");
-const { number } = require("@hapi/joi");
 Joi.objectId = require("joi-objectid")(Joi);
 
 const schema = mongoose.Schema({

@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-const { Note } = require('../../models/academics/note');
 const { Class } = require('../../models/academics/class');
 const { Student, validateNote } = require('../../models/academics/student');
 
@@ -39,8 +38,9 @@ router.post('/:studentId', async (req, res) => {
     let _class = await Class.findOne({ 'exams._id': req.body.exam });
     if (!_class) return res.status(400).send('exam not found.');
 
-    const notedExams = student.notes.find(e => e.exam == req.body.exam);
+    const notedExams = student.notes.find(e => e.exam._id == req.body.exam);
     if (notedExams) return res.status(400).send('exam already noted');
+    // req body contains exam id directly
 
     let exam = _class.exams.find(e => e._id == req.body.exam);
 
@@ -75,7 +75,7 @@ router.put('/:studentId/note/:noteId', async (req, res) => {
 
     let exam = _class.exams.find(e => e._id == req.body.exam);
 
-    
+
     student.notes = student.notes.map(n => {
         if (n._id == req.params.noteId) {
             return {
