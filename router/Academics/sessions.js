@@ -2,85 +2,123 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-const { Session, validateSession } = require('../../models/academics/session');
-const { Class } = require('../../models/academics/class');
-const { Subject } = require('../../models/academics/subject');
+const { Session } = require('../../models/academics/session');
+const { Class, validateSession } = require('../../models/academics/class');
+const { Formation } = require('../../models/academics/formation');
 
-router.get('/', async (req, res) => {
-    res.send(await Session.find().populate('class', 'Name').populate('subject', 'Name'));
+router.get('/:classId', async (req, res) => {
+    // add checking for classId in the other routes with array storage
+    const idStatus = mongoose.Types.ObjectId.isValid(req.params.classId);
+    if (!idStatus) return res.status(400).send('invalid class Id');
+
+    const _class = await Class.findById(req.params.classId);
+    if (!_class) return res.status(404).send('class not found.');
+
+    res.send(_class.sessions);
+
 });
 
-router.get('/:id', async (req, res) => {
-    const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
-    if (!idStatus) return res.status(400).send('invalid id.');
+router.get('/:classId/session/:sessionId', async (req, res) => {
+    let idStatus = mongoose.Types.ObjectId.isValid(req.params.classId);
+    if (!idStatus) return res.status(400).send('invalid class Id');
+    idStatus = mongoose.Types.ObjectId.isValid(req.params.sessionId);
+    if (!idStatus) return res.status(400).send('invalid session Id');
 
-    const session = await Session.findById(req.params.id).populate('class', 'Name').populate('subject', 'Name');
-    if (!session) return res.status(404).send('invalid Session.');
+    const _class = await Class.findById(req.params.classId);
+    if (!_class) return res.status(404).send('class not found.');
+    const session = _class.sessions.find(s => s._id == req.params.sessionId);
+    if (!session) return res.status(404).send('session not found.');
 
     res.send(session);
 });
 
-router.post('/', async (req, res) => {
-    const { error } = validateSession.validate(req.body);
-    if (error) return res.status(400).send(error.message);
+router.post('/:classId', async (req, res) => {
+    const idStatus = mongoose.Types.ObjectId.isValid(req.params.classId);
+    if (!idStatus) return res.status(400).send('invalid class Id');
 
-    const _class = await Class.findById(req.body.class);
-    if (!_class) return res.status(400).send('invalid class.');
-
-    const subject = await Subject.findById(req.body.subject);
-    if (!subject) return res.status(400).send('invalid subject.');
-
-    // make only one session per class at a time
-
-    const session = new Session({
-        class: req.body.class,
-        subject: req.body.subject,
-        weekDay: req.body.weekDay,
-        startHour: req.body.startHour,
-        duration: req.body.duration,
-    });
-
-    res.send(await session.save());
-});
-
-router.put('/:id', async (req, res) => {
-    const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
-    if (!idStatus) return res.status(400).send('invalid id.');
-
-    let session = await Session.findById(req.params.id);
-    if (!session) return res.status(404).send('invalid Session.');
+    const _class = await Class.findById(req.params.classId);
+    if (!_class) return res.status(404).send('class not found.');
 
     const { error } = validateSession.validate(req.body);
     if (error) return res.status(400).send(error.message);
 
-    const _class = await Class.findById(req.body.class);
-    if (!_class) return res.status(400).send('invalid class.');
+    // look for a solution for the type (== against ===))
+    const formation = await Formation.findOne({ 'subjects._id': req.body.subject });
+    if (!formation) return res.status(400).send('subject not found.');
+    const subject = formation.subjects.find(s => s._id == req.body.subject);
 
-    const subject = await Subject.findById(req.body.subject);
-    if (!subject) return res.status(400).send('invalid subject.');
+    // makes only one session per class at an hour
+    let session = _class.sessions.find(s => (s.weekDay == req.body.weekDay && s.startTime == req.body.startTime));
+    if (session) return res.status(400).send('timing already occupied');
 
-    session = await Session.findByIdAndUpdate(req.params.id, {
-        class: req.body.class,
-        subject: req.body.subject,
+    session = {
+        subject: {
+            _id: subject._id,
+            Name: subject.Name
+        },
         weekDay: req.body.weekDay,
-        startHour: req.body.startHour,
-        duration: req.body.duration,
-    }, {
-        new: true
-    });
+        startTime: req.body.startTime
+    };
+
+    _class.sessions.push(session);
+    await Class.findByIdAndUpdate(req.params.classId, _class);
 
     res.send(session);
 });
 
-router.delete('/:id', async (req, res) => {
-    const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
-    if (!idStatus) return res.status(400).send('invalid id.');
+router.put('/:classId/session/:sessionId', async (req, res) => {
+    let idStatus = mongoose.Types.ObjectId.isValid(req.params.classId);
+    if (!idStatus) return res.status(400).send('invalid class Id');
+    idStatus = mongoose.Types.ObjectId.isValid(req.params.sessionId);
+    if (!idStatus) return res.status(400).send('invalid session Id');
 
-    let session = await Session.findById(req.params.id);
-    if (!session) return res.status(404).send('invalid Session.');
+    const _class = await Class.findById(req.params.classId);
+    if (!_class) return res.status(404).send('class not found.');
+    let session = _class.sessions.find(s => s._id == req.params.sessionId);
+    if (!session) return res.status(404).send('session not found.');
 
-    await Session.findOneAndDelete(req.params.id);
-    res.send(session);
+    const { error } = validateSession.validate(req.body);
+    if (error) return res.status(400).send(error.message);
+
+    const formation = await Formation.findOne({ 'subjects._id': req.body.subject });
+    if (!formation) return res.status(400).send('subject not found.');
+    const subject = formation.subjects.find(s => s._id == req.body.subject);
+
+    session = _class.sessions.find(s => (s.weekDay == req.body.weekDay && s.startTime == req.body.startTime && s._id != req.params.sessionId));
+    if (session) return res.status(400).send('timing already occupied');
+
+    _class.sessions = _class.sessions.map(s => {
+        if (s._id == req.params.sessionId)
+            return {
+                _id: s._id,
+                subject: {
+                    _id: subject._id,
+                    Name: subject.Name
+                },
+                weekDay: req.body.weekDay,
+                startTime: req.body.startTime
+            };
+        return s;
+    });
+
+    await Class.findByIdAndUpdate(req.params.classId, _class);
+    res.send(_class.sessions);
+});
+
+router.delete('/:classId/session/:sessionId', async (req, res) => {
+    let idStatus = mongoose.Types.ObjectId.isValid(req.params.classId);
+    if (!idStatus) return res.status(400).send('invalid class Id');
+    idStatus = mongoose.Types.ObjectId.isValid(req.params.sessionId);
+    if (!idStatus) return res.status(400).send('invalid session Id');
+
+    const _class = await Class.findById(req.params.classId);
+    if (!_class) return res.status(404).send('class not found.');
+    let session = _class.sessions.find(s => s._id == req.params.sessionId);
+    if (!session) return res.status(404).send('session not found.');
+
+    _class.sessions = _class.sessions.filter(s => s._id != req.params.sessionId);
+    await Class.findByIdAndUpdate(req.params.classId, _class);
+    res.send(_class.sessions);
 });
 
 
