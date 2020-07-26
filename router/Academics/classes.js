@@ -10,6 +10,8 @@ router.get('/', async (req, res) => {
     res.send(await Class.find().populate('formation'));
 });
 
+
+// select specific elements per route to lower request size
 router.get('/:id', async (req, res) => {
     const idStatus = mongoose.Types.ObjectId.isValid(req.params.id);
     if (!idStatus) return res.status(400).send('invalid id.');
@@ -20,8 +22,23 @@ router.get('/:id', async (req, res) => {
     res.send(await Class.findById(_class).populate('students'));
 });
 
-router.get('/formation/:formationId', async (req, res) => {
+router.get('/formationClasses/:formationId', async (req, res) => {
     res.send(await Class.find({ formation: req.params.formationId }));
+});
+
+router.get('/:classId/formation', async (req, res) => {
+    // add classId checking
+
+    const idStatus = mongoose.Types.ObjectId.isValid(req.params.classId);
+    if (!idStatus) return res.status(400).send('invalid id.');
+
+    const _class = await Class.findById(req.params.classId);
+    if (!_class) return res.status(404).send('invalid class.');
+
+    const formation = await Formation.findById(_class.formation);
+    if (!formation) return res.status(404).send('formation not found.');
+
+    res.send(formation);
 });
 
 router.get('/:id/students/', async (req, res) => {

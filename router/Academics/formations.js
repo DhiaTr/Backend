@@ -15,7 +15,6 @@ const upload = multer({ storage: storage });
 
 const { Formation, validateFormation, validateSubject } = require('../../models/academics/formation');
 const { Page } = require('../../models/frontCms/page');
-const { Subject } = require('../../models/academics/subject');
 
 
 router.get('/', async (req, res) => {

@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-const { Session } = require('../../models/academics/session');
 const { Class, validateSession } = require('../../models/academics/class');
 const { Formation } = require('../../models/academics/formation');
 
