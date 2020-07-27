@@ -65,6 +65,33 @@ const schema = mongoose.Schema({
       maxlength: 20,
       required: true,
     },
+  }],
+  abscences: [{
+    session: {
+      _id: mongoose.Schema.Types.ObjectId,
+      subjectName: {
+        type: String,
+        minlength: 2,
+        maxlength: 100,
+        required: true
+      },
+      weekDay: {
+        type: String,
+        minlength: 5,
+        maxlength: 8,
+        required: true
+      },
+      startTime: {
+        type: Number,
+        min: 0,
+        max: 24,
+        required: true
+      },
+    },
+    date: {
+      type: Date,
+      required: true,
+    },
   }]
 });
 
@@ -94,5 +121,9 @@ module.exports.validateChange = Joi.object({
 module.exports.validateNote = Joi.object({
   exam: Joi.objectId(),
   value: Joi.number().min(0).max(20).required()
+});
+
+module.exports.validateAbscence = Joi.object({
+  session: Joi.objectId()
 });
 // add birthdate min and max to validation
